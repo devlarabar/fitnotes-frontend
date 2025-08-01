@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 
 interface Category {
@@ -86,7 +87,8 @@ export default function CategoriesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <ProtectedLayout>
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-[1300px] mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -141,9 +143,11 @@ export default function CategoriesPage() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </ProtectedLayout>
   )
 }
+
 
 function getCategoryEmoji(categoryName: string): string {
   const emojiMap: { [key: string]: string } = {

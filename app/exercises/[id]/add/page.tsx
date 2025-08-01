@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 
@@ -14,10 +15,10 @@ interface Exercise {
   measurement_type: number
   categories?: {
     name: string
-  }
+  }[]
   measurement_types?: {
     name: string
-  }
+  }[]
 }
 
 interface WeightUnit {
@@ -30,18 +31,31 @@ interface DistanceUnit {
   name: string
 }
 
+interface WorkoutData {
+  date: string
+  exercise: number
+  category: number
+  comment: string
+  weight?: number
+  weight_unit?: number
+  reps?: number
+  distance?: number
+  distance_unit?: number
+  time?: string
+}
+
 export default function AddWorkoutPage() {
   const params = useParams()
   const router = useRouter()
   const exerciseId = params.id as string
-  
+
   const [exercise, setExercise] = useState<Exercise | null>(null)
   const [weightUnits, setWeightUnits] = useState<WeightUnit[]>([])
   const [distanceUnits, setDistanceUnits] = useState<DistanceUnit[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Form state
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0], // Today's date
@@ -98,7 +112,7 @@ export default function AddWorkoutPage() {
         setExercise(exerciseData)
         setWeightUnits(weightData || [])
         setDistanceUnits(distanceData || [])
-        
+
         // Set default units
         if (weightData?.length > 0) {
           setFormData(prev => ({ ...prev, weight_unit: weightData[0].id.toString() }))
@@ -125,10 +139,14 @@ export default function AddWorkoutPage() {
     setError(null)
 
     try {
-      const workoutData: any = {
+      if (!exercise) {
+        throw new Error('Exercise data not found')
+      }
+
+      const workoutData: WorkoutData = {
         date: formData.date,
         exercise: parseInt(exerciseId),
-        category: exercise?.category,
+        category: exercise.category,
         comment: formData.comment || ''
       }
 
@@ -137,16 +155,16 @@ export default function AddWorkoutPage() {
         workoutData.weight = parseFloat(formData.weight)
         workoutData.weight_unit = parseInt(formData.weight_unit)
       }
-      
+
       if (formData.reps) {
         workoutData.reps = parseInt(formData.reps)
       }
-      
+
       if (formData.distance) {
         workoutData.distance = parseFloat(formData.distance)
         workoutData.distance_unit = parseInt(formData.distance_unit)
       }
-      
+
       if (formData.time) {
         workoutData.time = formData.time
       }
@@ -159,8 +177,8 @@ export default function AddWorkoutPage() {
         throw error
       }
 
-      // Success! Redirect to workouts page
-      router.push('/workouts')
+      // Success! Redirect to today's workouts page
+      router.push('/today')
     } catch (err) {
       console.error('Error saving workout:', err)
       setError(err instanceof Error ? err.message : 'Failed to save workout')
@@ -169,7 +187,7 @@ export default function AddWorkoutPage() {
     }
   }
 
-  const measurementType = exercise?.measurement_types?.name
+  const measurementType = exercise?.measurement_types?.[0]?.name
 
   if (loading) {
     return (
@@ -209,187 +227,191 @@ export default function AddWorkoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-[800px] mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Add Workout</h1>
-              <p className="mt-2 text-gray-600">
-                {exercise?.name} • {exercise?.categories?.name}
-              </p>
+    <ProtectedLayout>
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-[800px] mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Add Workout</h1>
+                <p className="mt-2 text-gray-600">
+                  {exercise?.name} • {exercise?.categories?.[0]?.name}
+                </p>
+              </div>
+              <Link
+                href={`/categories/${exercise?.category}`}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+              >
+                ← Back to Exercises
+              </Link>
             </div>
-            <Link 
-              href={`/categories/${exercise?.category}`}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-            >
-              ← Back to Exercises
-            </Link>
           </div>
-        </div>
 
-        {/* Form */}
-        <div className="bg-white shadow-lg rounded-lg border border-gray-200">
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Date */}
-            <div>
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                Date
-              </label>
-              <input
-                type="date"
-                id="date"
-                required
-                value={formData.date}
-                onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
+          {/* Form */}
+          <div className="bg-white shadow-lg rounded-lg border border-gray-200">
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Date */}
+              <div>
+                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  id="date"
+                  required
+                  value={formData.date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
 
-            {/* Weight & Reps (for reps-based exercises) */}
-            {measurementType === 'reps' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+
+              {/* Weight & Reps (for reps-based exercises) */}
+              {measurementType === 'reps' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-2">
+                      Weight (optional)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        id="weight"
+                        step="0.5"
+                        min="0"
+                        value={formData.weight}
+                        onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="25"
+                      />
+                      <select
+                        value={formData.weight_unit}
+                        onChange={(e) => setFormData(prev => ({ ...prev, weight_unit: e.target.value }))}
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        {weightUnits.map(unit => (
+                          <option key={unit.id} value={unit.id}>{unit.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="reps" className="block text-sm font-medium text-gray-700 mb-2">
+                      Reps
+                    </label>
+                    <input
+                      type="number"
+                      id="reps"
+                      min="1"
+                      required
+                      value={formData.reps}
+                      onChange={(e) => setFormData(prev => ({ ...prev, reps: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="12"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Distance (for distance-based exercises) */}
+              {measurementType === 'distance' && (
                 <div>
-                  <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-2">
-                    Weight (optional)
+                  <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
+                    Distance
                   </label>
                   <div className="flex gap-2">
                     <input
                       type="number"
-                      id="weight"
-                      step="0.5"
+                      id="distance"
+                      step="0.1"
                       min="0"
-                      value={formData.weight}
-                      onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
+                      required
+                      value={formData.distance}
+                      onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
                       className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="25"
+                      placeholder="5.0"
                     />
                     <select
-                      value={formData.weight_unit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, weight_unit: e.target.value }))}
+                      value={formData.distance_unit}
+                      onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
                       className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
-                      {weightUnits.map(unit => (
+                      {distanceUnits.map(unit => (
                         <option key={unit.id} value={unit.id}>{unit.name}</option>
                       ))}
                     </select>
                   </div>
                 </div>
-                
+              )}
+
+              {/* Time (for time-based exercises) */}
+              {measurementType === 'time' && (
                 <div>
-                  <label htmlFor="reps" className="block text-sm font-medium text-gray-700 mb-2">
-                    Reps
+                  <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
+                    Time (HH:MM:SS)
                   </label>
                   <input
-                    type="number"
-                    id="reps"
-                    min="1"
+                    type="text"
+                    id="time"
                     required
-                    value={formData.reps}
-                    onChange={(e) => setFormData(prev => ({ ...prev, reps: e.target.value }))}
+                    pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
+                    value={formData.time}
+                    onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="12"
+                    placeholder="00:30:00"
                   />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Format: hours:minutes:seconds (e.g., 00:30:00 for 30 minutes)
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Distance (for distance-based exercises) */}
-            {measurementType === 'distance' && (
+              {/* Comment */}
               <div>
-                <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
-                  Distance
+                <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
+                  Comment (optional)
                 </label>
-                <div className="flex gap-2">
-                  <input
-                    type="number"
-                    id="distance"
-                    step="0.1"
-                    min="0"
-                    required
-                    value={formData.distance}
-                    onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="5.0"
-                  />
-                  <select
-                    value={formData.distance_unit}
-                    onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
-                    className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {distanceUnits.map(unit => (
-                      <option key={unit.id} value={unit.id}>{unit.name}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {/* Time (for time-based exercises) */}
-            {measurementType === 'time' && (
-              <div>
-                <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                  Time (HH:MM:SS)
-                </label>
-                <input
-                  type="text"
-                  id="time"
-                  required
-                  pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
-                  value={formData.time}
-                  onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                <textarea
+                  id="comment"
+                  rows={3}
+                  value={formData.comment}
+                  onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="00:30:00"
+                  placeholder="Felt good today, increased weight..."
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Format: hours:minutes:seconds (e.g., 00:30:00 for 30 minutes)
-                </p>
               </div>
-            )}
 
-            {/* Comment */}
-            <div>
-              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-                Comment (optional)
-              </label>
-              <textarea
-                id="comment"
-                rows={3}
-                value={formData.comment}
-                onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Felt good today, increased weight..."
-              />
-            </div>
+              {/* Error */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                  <p className="text-sm text-red-700">{error}</p>
+                </div>
+              )}
 
-            {/* Error */}
-            {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-700">{error}</p>
+              {/* Submit */}
+              <div className="flex gap-4">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {submitting ? 'Saving...' : 'Save Workout'}
+                </button>
+
+                <Link
+                  href={`/categories/${exercise?.category}`}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-center"
+                >
+                  Cancel
+                </Link>
               </div>
-            )}
-
-            {/* Submit */}
-            <div className="flex gap-4">
-              <button
-                type="submit"
-                disabled={submitting}
-                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {submitting ? 'Saving...' : 'Save Workout'}
-              </button>
-              
-              <Link
-                href={`/categories/${exercise?.category}`}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-center"
-              >
-                Cancel
-              </Link>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedLayout>
   )
 }
