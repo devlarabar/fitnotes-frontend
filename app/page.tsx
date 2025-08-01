@@ -1,6 +1,6 @@
 import SupabaseConnection from '@/components/SupabaseConnection'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Link from 'next/link'
+import Button from '@/components/Button'
 
 export default function Home() {
   return (
@@ -25,24 +25,27 @@ export default function Home() {
           {/* Navigation */}
           <div className="mb-12 text-center">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
+              <Button
                 href="/today"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors"
+                variant="primary"
+                size="lg"
               >
                 Today&apos;s Workouts 🗓️
-              </Link>
-              <Link
+              </Button>
+              <Button
                 href="/workouts"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                variant="secondary"
+                size="lg"
               >
                 View All Workouts 📊
-              </Link>
-              <Link
+              </Button>
+              <Button
                 href="/categories"
-                className="inline-flex items-center px-6 py-3 border border-blue-600 text-base font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50 transition-colors"
+                variant="outline"
+                size="lg"
               >
                 Add Workout 💪
-              </Link>
+              </Button>
             </div>
           </div>
 

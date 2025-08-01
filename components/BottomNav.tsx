@@ -12,16 +12,16 @@ export default function BottomNav() {
 
   const navItems = [
     {
-      href: '/today',
-      icon: '🗓️',
-      label: 'Today',
-      active: pathname === '/today'
-    },
-    {
       href: '/',
       icon: '🏠',
       label: 'Home',
       active: pathname === '/'
+    },
+    {
+      href: '/today',
+      icon: '🗓️',
+      label: 'Today',
+      active: pathname === '/today'
     },
     {
       href: '/categories',
@@ -104,18 +104,18 @@ export default function BottomNav() {
                   href={item.href}
                   className={`flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 ${
                     item.active
-                      ? item.isAdd
-                        ? 'bg-blue-600 text-white shadow-lg scale-110'
-                        : 'bg-blue-50 text-blue-600'
+                                        ? item.isAdd
+                    ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg scale-110'
+                    : 'bg-blue-50 text-blue-600'
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   } ${item.isAdd ? 'transform' : ''}`}
                 >
                   <div
                     className={`text-xl mb-1 ${
                       item.isAdd
-                        ? item.active
-                          ? 'text-white font-bold'
-                          : 'text-blue-600 font-bold text-2xl'
+                                            ? item.active
+                      ? 'text-white font-bold'
+                      : 'text-purple-500 font-bold text-2xl'
                         : ''
                     }`}
                   >

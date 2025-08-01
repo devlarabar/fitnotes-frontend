@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
+import Button from '@/components/Button'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 
@@ -393,20 +394,21 @@ export default function AddWorkoutPage() {
 
               {/* Submit */}
               <div className="flex gap-4">
-                <button
+                <Button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  variant="rainbow"
+                  className="flex-1"
                 >
-                  {submitting ? 'Saving...' : 'Save Workout'}
-                </button>
+                  {submitting ? '💫 Saving...' : '✨ Save Workout'}
+                </Button>
 
-                <Link
+                <Button
                   href={`/categories/${exercise?.category}`}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors text-center"
+                  variant="outline"
                 >
                   Cancel
-                </Link>
+                </Button>
               </div>
             </form>
           </div>

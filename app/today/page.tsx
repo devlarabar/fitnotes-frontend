@@ -5,6 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
+import Button from '@/components/Button'
 import Link from 'next/link'
 
 interface Workout {
@@ -236,27 +237,28 @@ export default function TodayPage() {
               <p className="text-gray-500 mb-6">
                 Ready to start your workout for today?
               </p>
-              <Link
+              <Button
                 href="/categories"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                variant="rainbow"
+                size="lg"
               >
-                Add Your First Workout
-              </Link>
+                Add Your First Workout ✨
+              </Button>
             </div>
           ) : (
             <div className="space-y-6">
               {groupedWorkouts.map((group) => (
                 <div key={group.exercise.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
                   {/* Exercise Header */}
-                  <div className="bg-slate-800 text-white px-6 py-4">
+                  <div className="bg-gradient-to-r from-purple-400 to-pink-400 text-white px-6 py-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-lg font-semibold">{group.exercise.name}</h3>
-                        <p className="text-slate-300 text-sm">{group.exercise.category}</p>
+                        <p className="text-purple-100 text-sm">{group.exercise.category}</p>
                       </div>
                       <div className="text-right">
                         <div className="text-2xl font-bold">{group.sets.length}</div>
-                        <div className="text-xs text-slate-300">set{group.sets.length !== 1 ? 's' : ''}</div>
+                        <div className="text-xs text-purple-100">set{group.sets.length !== 1 ? 's' : ''}</div>
                       </div>
                     </div>
                   </div>
@@ -264,11 +266,11 @@ export default function TodayPage() {
                   {/* Sets */}
                   <div className="divide-y divide-gray-100">
                     {group.sets.map((workout, index) => (
-                      <div key={workout.id} className="px-6 py-4 hover:bg-gray-50">
+                      <div key={workout.id} className="px-6 py-4 hover:bg-purple-50">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <div className="flex-shrink-0">
-                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-800 text-sm font-medium">
+                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-cyan-100 to-purple-100 text-purple-700 text-sm font-medium">
                                 {index + 1}
                               </span>
                             </div>
@@ -292,13 +294,14 @@ export default function TodayPage() {
                   </div>
 
                   {/* Add Another Set */}
-                  <div className="px-6 py-3 bg-gray-50 border-t border-gray-100">
-                    <Link
+                  <div className="px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-100">
+                    <Button
                       href={`/exercises/${group.exercise.id}/add`}
-                      className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      variant="ghost"
+                      size="sm"
                     >
                       + Add another set
-                    </Link>
+                    </Button>
                   </div>
                 </div>
               ))}
@@ -308,12 +311,13 @@ export default function TodayPage() {
           {/* Quick Actions */}
           {groupedWorkouts.length > 0 && (
             <div className="mt-8 text-center">
-              <Link
+              <Button
                 href="/categories"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                variant="secondary"
+                size="lg"
               >
-                Add Different Exercise
-              </Link>
+                Add Different Exercise 🎯
+              </Button>
             </div>
           )}
         </div>

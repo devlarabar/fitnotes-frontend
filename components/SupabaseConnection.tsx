@@ -11,12 +11,13 @@ export default function SupabaseConnection() {
     const checkConnection = async () => {
       try {
         // Simple connection test - just check if we can reach Supabase
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { data, error } = await supabase.auth.getSession()
-        
+
         // If we get any response (even an error), it means we can connect
         // The error here would be auth-related, not connection-related
         setIsConnected(true)
-        
+
       } catch (error) {
         console.error('Supabase connection error:', error)
         setIsConnected(false)
@@ -28,7 +29,7 @@ export default function SupabaseConnection() {
     // Also check if environment variables are present
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    
+
     if (!supabaseUrl || !supabaseKey) {
       setIsConnected(false)
       setLoading(false)
@@ -62,7 +63,7 @@ export default function SupabaseConnection() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
           Supabase Connection Status
         </h3>
-        
+
         <div className={`px-4 py-3 rounded-md border text-center ${getStatusColor()}`}>
           <div className="flex items-center justify-center space-x-2">
             <span className="text-xl">{getStatusIcon()}</span>
