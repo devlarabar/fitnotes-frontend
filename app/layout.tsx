@@ -20,8 +20,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "FitNotes - Your Personal Fitness Tracker",
-  description: "Track your workouts and fitness progress with FitNotes",
+  title: "Lara's FitNotes Backup",
+  description: "Storage for Lara's workout data.",
   icons: {
     icon: '/favicon.ico',
   },
