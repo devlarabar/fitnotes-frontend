@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "./globals.css";
+import "@/lib/fontawesome"; // Import Font Awesome configuration
 import AuthProvider from "@/components/AuthProvider";
 
 const geistSans = Geist({

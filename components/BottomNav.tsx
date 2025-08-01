@@ -4,7 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from './AuthProvider'
 import { useState } from 'react'
-import RoseButton from './RoseButton'
+import RoseButton from './ui/RoseButton'
+import Modal from './ui/Modal'
 
 export default function BottomNav() {
   const pathname = usePathname()
@@ -52,32 +53,28 @@ export default function BottomNav() {
   return (
     <>
       {/* Logout Modal */}
-      {showLogout && (
-        <div className="fixed inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/80 to-cyan-100/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
-          <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/50 p-6 max-w-sm w-full">
-            <div className="text-center">
-              <div className="text-4xl mb-4">👋</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                Sign out?
-              </h3>
-              <p className="text-sm text-gray-500 mb-6">
-                {user?.email}
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowLogout(false)}
-                  className="hover:cursor-pointer flex-1 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 border border-purple-200 transition-colors"
-                >
-                  Cancel
-                </button>
-                <RoseButton onClick={handleLogout}>
-                  Sign out
-                </RoseButton>
-              </div>
-            </div>
+      <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} maxWidth="sm">
+        <div className="text-center">
+          <div className="text-4xl mb-4">👋</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            Sign out?
+          </h3>
+          <p className="text-sm text-gray-500 mb-6">
+            {user?.email}
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowLogout(false)}
+              className="hover:cursor-pointer flex-1 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 border border-purple-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <RoseButton onClick={handleLogout}>
+              Sign out
+            </RoseButton>
           </div>
         </div>
-      )}
+      </Modal>
 
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-500 shadow-lg z-50">
         <div className="max-w-md mx-auto">

@@ -1,6 +1,8 @@
 import SupabaseConnection from '@/components/SupabaseConnection'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Button from '@/components/Button'
+import Button from '@/components/ui/Button'
+import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
+import CustomLink from '@/components/typography/CustomLink';
 
 export default function Home() {
   return (
@@ -49,14 +51,14 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Lorem Ipsum Content */}
-          <div className="bg-white shadow-lg rounded-lg p-8">
+          {/* About */}
+          <GradientBorderContainer>
             <h2 className="text-2xl font-semibold text-gray-900 mb-6">
               About Lara&apos;s FitNotes Backup
             </h2>
             <div className="prose prose-lg text-gray-700 space-y-4">
               <p>
-                I used FitNotes on Android for over a decade. Then I broke my phone,
+                I used <CustomLink href="https://www.fitnotesapp.com/">FitNotes</CustomLink> on Android for over a decade. Then I broke my phone,
                 and switched to an iPhone, and discovered that FitNotes isn&apos;t supported
                 on iOS. Heartbreaking. Anyway, here&apos;s my fitness data.
               </p>
@@ -66,7 +68,7 @@ export default function Home() {
                 insert the data into the new tables. This app was built with Next.js.
               </p>
             </div>
-          </div>
+          </GradientBorderContainer>
         </div>
       </div>
     </ProtectedLayout>

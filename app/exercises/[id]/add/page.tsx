@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Button from '@/components/Button'
+import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 

@@ -5,8 +5,11 @@ export const dynamic = 'force-dynamic'
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Button from '@/components/Button'
+import Button from '@/components/ui/Button'
+import EditWorkoutModal from '@/components/EditWorkoutModal'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
+import { faEdit } from '@fortawesome/free-solid-svg-icons'
 
 interface Workout {
   id: number
@@ -49,43 +52,14 @@ export default function TodayPage() {
   const [groupedWorkouts, setGroupedWorkouts] = useState<GroupedWorkout[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [editWorkout, setEditWorkout] = useState<Workout | null>(null)
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
 
   useEffect(() => {
-    const fetchTodaysWorkouts = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('workouts')
-          .select(`
-            *,
-            exercises(name),
-            categories(name),
-            weight_units(name),
-            distance_units(name)
-          `)
-          .eq('date', today)
-          .order('exercise', { ascending: true })
-          .order('id', { ascending: true })
-
-        if (error) {
-          throw error
-        }
-
-        setWorkouts(data || [])
-
-        // Group workouts by exercise
-        const grouped = groupWorkoutsByExercise(data || [])
-        setGroupedWorkouts(grouped)
-      } catch (err) {
-        console.error('Error fetching today\'s workouts:', err)
-        setError(err instanceof Error ? err.message : 'Failed to fetch workouts')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchTodaysWorkouts()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [today])
 
   const groupWorkoutsByExercise = (workouts: Workout[]): GroupedWorkout[] => {
@@ -133,6 +107,41 @@ export default function TodayPage() {
 
   const getTotalSets = () => {
     return groupedWorkouts.reduce((total, group) => total + group.sets.length, 0)
+  }
+
+  const handleEditWorkout = (workout: Workout) => {
+    setEditWorkout(workout)
+    setIsEditModalOpen(true)
+  }
+
+  const handleEditModalClose = () => {
+    setIsEditModalOpen(false)
+    setEditWorkout(null)
+  }
+
+  const handleEditSuccess = () => {
+    // Refresh the workouts data
+    fetchTodaysWorkouts()
+  }
+
+  const fetchTodaysWorkouts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('workouts')
+        .select(`*, exercises(name), categories(name), weight_units(name), distance_units(name)`)
+        .eq('date', today)
+        .order('exercise', { ascending: true })
+        .order('id', { ascending: true })
+
+      if (error) { throw error }
+      setWorkouts(data || [])
+      const grouped = groupWorkoutsByExercise(data || [])
+      setGroupedWorkouts(grouped)
+    } catch (err) { 
+      setError(err instanceof Error ? err.message : 'Failed to fetch workouts') 
+    } finally { 
+      setLoading(false) 
+    }
   }
 
   if (loading) {
@@ -271,7 +280,11 @@ export default function TodayPage() {
                     {/* Sets */}
                     <div className="divide-y divide-gray-100">
                       {group.sets.map((workout, index) => (
-                        <div key={workout.id} className="px-6 py-4 hover:bg-purple-50">
+                        <div 
+                          key={workout.id} 
+                          className="px-6 py-4 hover:bg-purple-50 cursor-pointer transition-colors"
+                          onClick={() => handleEditWorkout(workout)}
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-4">
                               <div className="flex-shrink-0">
@@ -290,8 +303,13 @@ export default function TodayPage() {
                                 )}
                               </div>
                             </div>
-                            <div className="text-xs text-gray-400">
-                              {new Date(`${workout.date}T12:00:00`).toLocaleDateString()}
+                            <div className="flex items-center space-x-2">
+                              <div className="text-xs text-gray-400">
+                                {new Date(`${workout.date}T12:00:00`).toLocaleDateString()}
+                              </div>
+                              <div className="text-xs text-purple-500">
+                                <FontAwesomeIcon icon={faEdit} />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -322,11 +340,19 @@ export default function TodayPage() {
                 variant="secondary"
                 size="lg"
               >
-                Add Different Exercise 🎯
+                Add Exercise
               </Button>
             </div>
           )}
         </div>
+
+        {/* Edit Workout Modal */}
+        <EditWorkoutModal
+          workout={editWorkout}
+          isOpen={isEditModalOpen}
+          onClose={handleEditModalClose}
+          onSuccess={handleEditSuccess}
+        />
       </div>
     </ProtectedLayout>
   )

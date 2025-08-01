@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import GradientBorderContainer from './ui/GradientBorderContainer'
 
 export default function SupabaseConnection() {
   const [isConnected, setIsConnected] = useState<boolean | null>(null)
@@ -59,8 +60,7 @@ export default function SupabaseConnection() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <div className="bg-gradient-to-r from-purple-200 via-pink-200 to-emerald-200 p-[1px] shadow-lg rounded-lg">
-        <div className="bg-white rounded-lg p-6">
+      <GradientBorderContainer className="p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
           Supabase Connection Status
         </h3>
@@ -83,8 +83,7 @@ export default function SupabaseConnection() {
             </ul>
           </div>
         )}
-        </div>
-      </div>
+      </GradientBorderContainer>
     </div>
   )
 }
