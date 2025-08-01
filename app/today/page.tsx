@@ -218,13 +218,17 @@ export default function TodayPage() {
           {/* Summary */}
           {groupedWorkouts.length > 0 && (
             <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="text-2xl font-bold text-blue-600">{groupedWorkouts.length}</div>
-                <div className="text-sm text-gray-600">Exercise{groupedWorkouts.length !== 1 ? 's' : ''}</div>
+              <div className="bg-gradient-to-r from-purple-400 via-cyan-400 to-emerald-400 p-[1px] rounded-lg shadow-sm">
+                <div className="bg-white rounded-lg p-4">
+                  <div className="text-2xl font-bold text-blue-600">{groupedWorkouts.length}</div>
+                  <div className="text-sm text-gray-600">Exercise{groupedWorkouts.length !== 1 ? 's' : ''}</div>
+                </div>
               </div>
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-                <div className="text-2xl font-bold text-green-600">{getTotalSets()}</div>
-                <div className="text-sm text-gray-600">Total Set{getTotalSets() !== 1 ? 's' : ''}</div>
+              <div className="bg-gradient-to-r from-purple-400 via-cyan-400 to-emerald-400 p-[1px] rounded-lg shadow-sm">
+                <div className="bg-white rounded-lg p-4">
+                  <div className="text-2xl font-bold text-green-600">{getTotalSets()}</div>
+                  <div className="text-sm text-gray-600">Total Set{getTotalSets() !== 1 ? 's' : ''}</div>
+                </div>
               </div>
             </div>
           )}
@@ -248,60 +252,62 @@ export default function TodayPage() {
           ) : (
             <div className="space-y-6">
               {groupedWorkouts.map((group) => (
-                <div key={group.exercise.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                  {/* Exercise Header */}
-                  <div className="bg-gradient-to-r from-purple-400 to-pink-400 text-white px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h3 className="text-lg font-semibold">{group.exercise.name}</h3>
-                        <p className="text-purple-100 text-sm">{group.exercise.category}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold">{group.sets.length}</div>
-                        <div className="text-xs text-purple-100">set{group.sets.length !== 1 ? 's' : ''}</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Sets */}
-                  <div className="divide-y divide-gray-100">
-                    {group.sets.map((workout, index) => (
-                      <div key={workout.id} className="px-6 py-4 hover:bg-purple-50">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="flex-shrink-0">
-                              <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-cyan-100 to-purple-100 text-purple-700 text-sm font-medium">
-                                {index + 1}
-                              </span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                {formatWorkoutDetails(workout) || 'Completed'}
-                              </div>
-                              {workout.comment && (
-                                <div className="text-sm text-gray-500 mt-1">
-                                  {workout.comment}
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-xs text-gray-400">
-                            {new Date(`${workout.date}T12:00:00`).toLocaleDateString()}
-                          </div>
+                <div key={group.exercise.id} className="bg-gradient-to-r from-purple-500 via-purple-400 to-purple-500 p-[1px] rounded-lg shadow-sm">
+                  <div className="bg-white rounded-lg overflow-hidden">
+                    {/* Exercise Header */}
+                    <div className="bg-purple-100 text-purple-800 px-6 py-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold">{group.exercise.name}</h3>
+                          <p className="text-purple-600 text-sm">{group.exercise.category}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-2xl font-bold">{group.sets.length}</div>
+                          <div className="text-xs text-purple-600">set{group.sets.length !== 1 ? 's' : ''}</div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
 
-                  {/* Add Another Set */}
-                  <div className="px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-100">
-                    <Button
-                      href={`/exercises/${group.exercise.id}/add`}
-                      variant="ghost"
-                      size="sm"
-                    >
-                      + Add another set
-                    </Button>
+                    {/* Sets */}
+                    <div className="divide-y divide-gray-100">
+                      {group.sets.map((workout, index) => (
+                        <div key={workout.id} className="px-6 py-4 hover:bg-purple-50">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <div className="flex-shrink-0">
+                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-cyan-100 to-purple-100 text-purple-700 text-sm font-medium">
+                                  {index + 1}
+                                </span>
+                              </div>
+                              <div>
+                                <div className="text-sm font-medium text-gray-900">
+                                  {formatWorkoutDetails(workout) || 'Completed'}
+                                </div>
+                                {workout.comment && (
+                                  <div className="text-sm text-gray-500 mt-1">
+                                    {workout.comment}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              {new Date(`${workout.date}T12:00:00`).toLocaleDateString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add Another Set */}
+                    <div className="px-6 py-3 bg-gradient-to-r from-purple-50 to-pink-50 border-t border-purple-100">
+                      <Button
+                        href={`/exercises/${group.exercise.id}/add`}
+                        variant="ghost"
+                        size="sm"
+                      >
+                        + Add another set
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

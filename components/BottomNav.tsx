@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from './AuthProvider'
 import { useState } from 'react'
+import RoseButton from './RoseButton'
 
 export default function BottomNav() {
   const pathname = usePathname()
@@ -52,8 +53,8 @@ export default function BottomNav() {
     <>
       {/* Logout Modal */}
       {showLogout && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+        <div className="fixed inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/80 to-cyan-100/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+          <div className="bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/50 p-6 max-w-sm w-full">
             <div className="text-center">
               <div className="text-4xl mb-4">👋</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -65,36 +66,33 @@ export default function BottomNav() {
               <div className="flex gap-3">
                 <button
                   onClick={() => setShowLogout(false)}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                  className="hover:cursor-pointer flex-1 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 border border-purple-200 transition-colors"
                 >
                   Cancel
                 </button>
-                <button
-                  onClick={handleLogout}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
-                >
+                <RoseButton onClick={handleLogout}>
                   Sign out
-                </button>
+                </RoseButton>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-500 shadow-lg z-50">
         <div className="max-w-md mx-auto">
-          <div className="flex justify-around items-center py-2">
+          <div className="flex justify-around items-center py-3">
             {navItems.map((item) => (
               item.isProfile ? (
                 <button
                   key="profile"
                   onClick={handleProfileClick}
-                  className="flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  className="hover:cursor-pointer flex flex-col items-center justify-center w-14 h-14 rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 >
-                  <div className="text-xl mb-1">
+                  <div className="text-xl">
                     {item.icon}
                   </div>
-                  <span className="text-xs font-medium">
+                  <span className="text-xs font-medium mt-1">
                     {item.label}
                   </span>
                 </button>
@@ -102,29 +100,26 @@ export default function BottomNav() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`flex flex-col items-center px-3 py-2 rounded-lg transition-all duration-200 ${
-                    item.active
-                                        ? item.isAdd
-                    ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg scale-110'
-                    : 'bg-blue-50 text-blue-600'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  } ${item.isAdd ? 'transform' : ''}`}
+                  className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg transition-all duration-200 ${item.active
+                    ? item.isAdd
+                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg scale-110'
+                      : 'bg-blue-50 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    } ${item.isAdd ? 'transform' : ''}`}
                 >
                   <div
-                    className={`text-xl mb-1 ${
-                      item.isAdd
-                                            ? item.active
-                      ? 'text-white font-bold'
-                      : 'text-purple-500 font-bold text-2xl'
-                        : ''
-                    }`}
+                    className={`${item.isAdd
+                      ? item.active
+                        ? 'text-white font-bold text-2xl'
+                        : 'text-purple-500 font-bold text-3xl'
+                      : 'text-xl'
+                      }`}
                   >
                     {item.icon}
                   </div>
                   <span
-                    className={`text-xs font-medium ${
-                      item.isAdd && item.active ? 'text-white' : ''
-                    }`}
+                    className={`text-xs font-medium mt-1 ${item.isAdd && item.active ? 'text-white' : ''
+                      }`}
                   >
                     {item.label}
                   </span>

@@ -30,21 +30,21 @@ export default function Home() {
                 variant="primary"
                 size="lg"
               >
-                Today&apos;s Workouts 🗓️
+                Today&apos;s Workouts
               </Button>
               <Button
                 href="/workouts"
                 variant="secondary"
                 size="lg"
               >
-                View All Workouts 📊
+                View All Workouts
               </Button>
               <Button
                 href="/categories"
                 variant="outline"
                 size="lg"
               >
-                Add Workout 💪
+                Add Workout
               </Button>
             </div>
           </div>

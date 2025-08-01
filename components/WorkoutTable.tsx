@@ -23,10 +23,11 @@ interface WorkoutTableProps {
 }
 
 const tableStyles = {
-  container: "bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200",
-  wrapper: "overflow-x-auto h-[60vh] relative workout-table-wrapper",
+  container: "bg-gradient-to-r from-purple-200 via-pink-200 via-cyan-200 to-emerald-200 p-[1px] shadow-lg rounded-lg",
+  wrapper: "bg-white rounded-lg overflow-hidden",
+  tableWrapper: "overflow-x-auto h-[60vh] relative workout-table-wrapper",
   table: "min-w-full text-sm",
-  header: "sticky top-0 z-10 bg-gradient-to-r from-purple-400 to-pink-400 text-white px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b border-purple-300",
+  header: "sticky top-0 z-10 bg-purple-100 text-purple-800 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider border-b border-purple-200",
   row: "hover:bg-purple-50 transition-colors duration-150",
   cellBase: "px-4 py-3 whitespace-nowrap border-b border-gray-100",
   cellId: "text-gray-500 font-mono text-xs",
@@ -53,6 +54,7 @@ export default function WorkoutTable({ workouts }: WorkoutTableProps) {
   return (
     <div className={tableStyles.container}>
       <div className={tableStyles.wrapper}>
+        <div className={tableStyles.tableWrapper}>
         <table className={tableStyles.table}>
           <thead>
             <tr>
@@ -109,6 +111,7 @@ export default function WorkoutTable({ workouts }: WorkoutTableProps) {
                   ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )
