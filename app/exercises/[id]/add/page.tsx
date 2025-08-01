@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Button from '@/components/ui/Button'
@@ -11,7 +11,7 @@ import { Exercise, WeightUnit, DistanceUnit, WorkoutData } from '@/lib/types'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import BackButton from '@/components/ui/BackButton'
 
-export default function AddWorkoutPage() {
+function AddWorkoutContent() {
   const params = useParams()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -195,151 +195,127 @@ export default function AddWorkoutPage() {
   }
 
   return (
-    <ProtectedLayout>
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[800px] mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Add Workout</h1>
-                <p className="mt-2 text-gray-600">
-                  {exercise?.name} • {exercise?.categories?.name}
-                </p>
-              </div>
-              <BackButton>← Back to Exercises</BackButton>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-[800px] mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Add Workout</h1>
+              <p className="mt-2 text-gray-600">
+                {exercise?.name} • {exercise?.categories?.name}
+              </p>
             </div>
+            <BackButton>← Back to Exercises</BackButton>
           </div>
+        </div>
 
-          {/* Form */}
-          <GradientBorderContainer>
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
-              {/* Date */}
-              <div>
-                <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                  Date
-                </label>
-                <input
-                  type="date"
-                  id="date"
-                  required
-                  value={formData.date}
-                  onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
+        {/* Form */}
+        <GradientBorderContainer>
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* Date */}
+            <div>
+              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+                Date
+              </label>
+              <input
+                type="date"
+                id="date"
+                required
+                value={formData.date}
+                onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
 
 
 
-              {/* Weight & Reps (for reps-based exercises) */}
-              {measurementType === 'reps' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-2">
-                      Weight (optional)
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        id="weight"
-                        step="0.5"
-                        min="0"
-                        value={formData.weight}
-                        onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="25"
-                      />
-                      <select
-                        value={formData.weight_unit}
-                        onChange={(e) => setFormData(prev => ({ ...prev, weight_unit: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        {weightUnits.map(unit => (
-                          <option key={unit.id} value={unit.id}>{unit.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div>
-                    <label htmlFor="reps" className="block text-sm font-medium text-gray-700 mb-2">
-                      Reps
-                    </label>
+            {/* Weight & Reps (for reps-based exercises) */}
+            {measurementType === 'reps' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-2">
+                    Weight (optional)
+                  </label>
+                  <div className="flex gap-2">
                     <input
                       type="number"
-                      id="reps"
-                      min="1"
-                      required
-                      value={formData.reps}
-                      onChange={(e) => setFormData(prev => ({ ...prev, reps: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="12"
+                      id="weight"
+                      step="0.5"
+                      min="0"
+                      value={formData.weight}
+                      onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="25"
                     />
+                    <select
+                      value={formData.weight_unit}
+                      onChange={(e) => setFormData(prev => ({ ...prev, weight_unit: e.target.value }))}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      {weightUnits.map(unit => (
+                        <option key={unit.id} value={unit.id}>{unit.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-              )}
 
-              {/* Distance & Time (for distance-based exercises) */}
-              {measurementType === 'distance' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
-                      Distance
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="number"
-                        id="distance"
-                        step="0.1"
-                        min="0"
-                        required
-                        value={formData.distance}
-                        onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="5.0"
-                      />
-                      <select
-                        value={formData.distance_unit}
-                        onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
-                        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        {distanceUnits.map(unit => (
-                          <option key={unit.id} value={unit.id}>{unit.name}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                <div>
+                  <label htmlFor="reps" className="block text-sm font-medium text-gray-700 mb-2">
+                    Reps
+                  </label>
+                  <input
+                    type="number"
+                    id="reps"
+                    min="1"
+                    required
+                    value={formData.reps}
+                    onChange={(e) => setFormData(prev => ({ ...prev, reps: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="12"
+                  />
+                </div>
+              </div>
+            )}
 
-                  <div>
-                    <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                      Time (optional)
-                    </label>
+            {/* Distance & Time (for distance-based exercises) */}
+            {measurementType === 'distance' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
+                    Distance
+                  </label>
+                  <div className="flex gap-2">
                     <input
-                      type="text"
-                      id="time"
-                      pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
-                      value={formData.time}
-                      onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="00:30:00"
+                      type="number"
+                      id="distance"
+                      step="0.1"
+                      min="0"
+                      required
+                      value={formData.distance}
+                      onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="5.0"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Format: HH:MM:SS (e.g., 00:30:00)
-                    </p>
+                    <select
+                      value={formData.distance_unit}
+                      onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
+                      className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      {distanceUnits.map(unit => (
+                        <option key={unit.id} value={unit.id}>{unit.name}</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-              )}
 
-              {/* Time (for time-based exercises) */}
-              {measurementType === 'time' && (
                 <div>
                   <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                    Time (HH:MM:SS)
+                    Time (optional)
                   </label>
                   <input
                     type="text"
                     id="time"
-                    required
                     pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
                     value={formData.time}
                     onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
@@ -347,55 +323,96 @@ export default function AddWorkoutPage() {
                     placeholder="00:30:00"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Format: hours:minutes:seconds (e.g., 00:30:00 for 30 minutes)
+                    Format: HH:MM:SS (e.g., 00:30:00)
                   </p>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Comment */}
+            {/* Time (for time-based exercises) */}
+            {measurementType === 'time' && (
               <div>
-                <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-                  Comment (optional)
+                <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
+                  Time (HH:MM:SS)
                 </label>
-                <textarea
-                  id="comment"
-                  rows={3}
-                  value={formData.comment}
-                  onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
+                <input
+                  type="text"
+                  id="time"
+                  required
+                  pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
+                  value={formData.time}
+                  onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Felt good today, increased weight..."
+                  placeholder="00:30:00"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Format: hours:minutes:seconds (e.g., 00:30:00 for 30 minutes)
+                </p>
               </div>
+            )}
 
-              {/* Error */}
-              {error && (
-                <div className="bg-red-50 border border-red-200 rounded-md p-3">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              )}
+            {/* Comment */}
+            <div>
+              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
+                Comment (optional)
+              </label>
+              <textarea
+                id="comment"
+                rows={3}
+                value={formData.comment}
+                onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Felt good today, increased weight..."
+              />
+            </div>
 
-              {/* Submit */}
-              <div className="flex gap-4">
-                <Button
-                  type="submit"
-                  disabled={submitting}
-                  variant="rainbow"
-                  className="flex-1"
-                >
-                  {submitting ? 'Saving...' : 'Save Workout'}
-                </Button>
-
-                <Button
-                  href={`/categories/${exercise?.category || ''}`}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
+            {/* Error */}
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+                <p className="text-sm text-red-700">{error}</p>
               </div>
-            </form>
-          </GradientBorderContainer>
-        </div>
+            )}
+
+            {/* Submit */}
+            <div className="flex gap-4">
+              <Button
+                type="submit"
+                disabled={submitting}
+                variant="rainbow"
+                className="flex-1"
+              >
+                {submitting ? 'Saving...' : 'Save Workout'}
+              </Button>
+
+              <Button
+                href={`/categories/${exercise?.category || ''}`}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </GradientBorderContainer>
       </div>
+    </div>
+  )
+}
+
+export default function AddWorkoutPage() {
+  return (
+    <ProtectedLayout>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50 py-12 px-4">
+          <div className="max-w-[800px] mx-auto">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading exercise...</p>
+            </div>
+          </div>
+        </div>
+      }>
+        <AddWorkoutContent />
+      </Suspense>
     </ProtectedLayout>
   )
 }

@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
@@ -11,7 +11,7 @@ import { Exercise, Category } from '@/lib/types'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import BackButton from '@/components/ui/BackButton'
 
-export default function ExercisesPage() {
+function ExercisesContent() {
   const params = useParams()
   const searchParams = useSearchParams()
   const categoryId = params.id as string
@@ -108,33 +108,32 @@ export default function ExercisesPage() {
   }
 
   return (
-    <ProtectedLayout>
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {category?.name} Exercises
-                </h1>
-                <p className="mt-2 text-gray-600">
-                  Choose an exercise to add to your workout
-                </p>
-              </div>
-              <BackButton>← Back to Categories</BackButton>
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="max-w-[1300px] mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">
+                {category?.name} Exercises
+              </h1>
+              <p className="mt-2 text-gray-600">
+                Choose an exercise to add to your workout
+              </p>
             </div>
+            <BackButton>← Back to Categories</BackButton>
           </div>
+        </div>
 
-          {/* Exercises List */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {exercises.map((exercise) => (
-              <Link
-                key={exercise.id}
-                href={`/exercises/${exercise.id}/add${date ? `?date=${date}` : ''}`}
-                className="group"
-              >
-                <GradientBorderContainer>
+        {/* Exercises List */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {exercises.map((exercise) => (
+            <Link
+              key={exercise.id}
+              href={`/exercises/${exercise.id}/add${date ? `?date=${date}` : ''}`}
+              className="group"
+            >
+              <GradientBorderContainer>
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
@@ -150,22 +149,40 @@ export default function ExercisesPage() {
                     </span>
                   </div>
                 </div>
-                </GradientBorderContainer>
-              </Link>
-            ))}
-          </div>
-
-          {exercises.length === 0 && (
-            <div className="text-center py-12">
-              <div className="text-gray-400 text-4xl mb-4">🏋️</div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No exercises found</h3>
-              <p className="text-gray-500">
-                No exercises available in this category.
-              </p>
-            </div>
-          )}
+              </GradientBorderContainer>
+            </Link>
+          ))}
         </div>
+
+        {exercises.length === 0 && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 text-4xl mb-4">🏋️</div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No exercises found</h3>
+            <p className="text-gray-500">
+              No exercises available in this category.
+            </p>
+          </div>
+        )}
       </div>
+    </div>
+  )
+}
+
+export default function ExercisesPage() {
+  return (
+    <ProtectedLayout>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50 py-12 px-4">
+          <div className="max-w-[1300px] mx-auto">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading exercises...</p>
+            </div>
+          </div>
+        </div>
+      }>
+        <ExercisesContent />
+      </Suspense>
     </ProtectedLayout>
   )
 }

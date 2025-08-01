@@ -2,18 +2,19 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Category } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
+import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 
-export default function CategoriesPage() {
+function CategoriesContent() {
   const searchParams = useSearchParams()
   const date = searchParams.get('date')
-  
+
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -83,8 +84,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <ProtectedLayout>
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-[1300px] mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -107,7 +107,7 @@ export default function CategoriesPage() {
               href={`/categories/${category.id}${date ? `?date=${date}` : ''}`}
               className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200 overflow-hidden"
             >
-              <div className="p-6">
+              <GradientBorderContainer>
                 <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-lg mb-4 mx-auto group-hover:bg-blue-200 transition-colors">
                   <span className="text-2xl">
                     {getCategoryEmoji(category.name)}
@@ -119,7 +119,7 @@ export default function CategoriesPage() {
                 <p className="text-sm text-gray-500 text-center">
                   View exercises →
                 </p>
-              </div>
+              </GradientBorderContainer>
             </Link>
           ))}
         </div>
@@ -134,8 +134,7 @@ export default function CategoriesPage() {
           </div>
         )}
       </div>
-      </div>
-    </ProtectedLayout>
+    </div>
   )
 }
 
@@ -152,6 +151,25 @@ function getCategoryEmoji(categoryName: string): string {
     'Cardio': '❤️',
     'Full Body': '🏃'
   }
-  
+
   return emojiMap[categoryName] || '🏋️'
+}
+
+export default function CategoriesPage() {
+  return (
+    <ProtectedLayout>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50 py-12 px-4">
+          <div className="max-w-[1300px] mx-auto">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+              <p className="mt-4 text-gray-600">Loading categories...</p>
+            </div>
+          </div>
+        </div>
+      }>
+        <CategoriesContent />
+      </Suspense>
+    </ProtectedLayout>
+  )
 }
