@@ -105,7 +105,12 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className={
+                    "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium "
+                    + "text-white hover:cursor-pointer bg-gradient-to-r from-pink-400 to-rose-400 "
+                    + "hover:from-pink-500 hover:to-rose-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-rose-500 "
+                    + "disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                }
               >
                 {loading ? (
                   <div className="flex items-center">
