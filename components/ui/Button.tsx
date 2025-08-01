@@ -33,7 +33,7 @@ export default function Button({
   const variantClasses = {
     primary: 'bg-gradient-to-r from-cyan-500 to-purple-400 hover:from-cyan-600 hover:to-purple-500 text-white shadow-sm focus:ring-purple-500',
     secondary: 'bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white shadow-sm focus:ring-pink-500',
-    rainbow: 'bg-gradient-to-r from-emerald-300 via-cyan-300 via-purple-300 to-pink-300 hover:from-emerald-400 hover:via-cyan-400 hover:via-purple-400 hover:to-pink-400 text-white shadow-md focus:ring-purple-500',
+    rainbow: 'bg-gradient-to-r from-emerald-400 via-cyan-400 via-purple-400 to-pink-400 hover:from-emerald-500 hover:via-cyan-500 hover:via-purple-500 hover:to-pink-500 text-white shadow-md focus:ring-purple-500',
     pink: 'bg-gradient-to-r from-pink-300 to-rose-300 hover:from-pink-400 hover:to-rose-400 text-white shadow-sm focus:ring-pink-500',
     outline: 'border-2 border-purple-300 text-purple-600 bg-white hover:bg-purple-50 focus:ring-purple-500',
     ghost: 'text-purple-600 hover:bg-purple-50 hover:text-purple-700 focus:ring-purple-500'

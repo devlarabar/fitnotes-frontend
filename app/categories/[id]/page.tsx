@@ -7,21 +7,7 @@ import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-
-interface Exercise {
-  id: number
-  name: string
-  category: number
-  measurement_type: number
-  measurement_types?: {
-    name: string
-  }[]
-}
-
-interface Category {
-  id: number
-  name: string
-}
+import { Exercise, Category } from '@/lib/types'
 
 export default function ExercisesPage() {
   const params = useParams()
@@ -53,8 +39,7 @@ export default function ExercisesPage() {
             id,
             name,
             category,
-            measurement_type,
-            measurement_types(name)
+            measurement_type:measurement_types(name)
           `)
           .eq('category', categoryId)
           .order('name', { ascending: true })
@@ -64,7 +49,7 @@ export default function ExercisesPage() {
         }
 
         setCategory(categoryData)
-        setExercises(exerciseData || [])
+        setExercises((exerciseData || []) as unknown as Exercise[])
       } catch (err) {
         console.error('Error fetching data:', err)
         setError(err instanceof Error ? err.message : 'Failed to fetch exercises')
@@ -161,7 +146,7 @@ export default function ExercisesPage() {
                       {exercise.name}
                     </h3>
                     <p className="text-sm text-gray-500 mt-1">
-                      Measurement: {exercise.measurement_types?.[0]?.name || 'Unknown'}
+                      Measurement: {exercise.measurement_type?.name || 'Unknown'}
                     </p>
                   </div>
                   <div className="ml-4 flex-shrink-0">

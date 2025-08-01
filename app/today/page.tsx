@@ -10,32 +10,7 @@ import EditWorkoutModal from '@/components/EditWorkoutModal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
-
-interface Workout {
-  id: number
-  date: string
-  exercise: number
-  category: number
-  weight?: number
-  weight_unit?: number
-  reps?: number
-  distance?: number
-  distance_unit?: number
-  time?: string
-  comment?: string
-  exercises?: {
-    name: string
-  }
-  categories?: {
-    name: string
-  }
-  weight_units?: {
-    name: string
-  }
-  distance_units?: {
-    name: string
-  }
-}
+import { Workout } from '@/lib/types'
 
 interface GroupedWorkout {
   exercise: {

@@ -8,33 +8,7 @@ import { supabase } from '@/lib/supabase'
 import WorkoutTable from '@/components/WorkoutTable'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
-
-interface Workout {
-  id: number
-  date: string
-  exercise: number
-  category: number
-  weight?: number
-  weight_unit?: number
-  reps?: number
-  distance?: number
-  distance_unit?: number
-  time?: string
-  comment?: string
-  // Foreign key resolved fields
-  exercises?: {
-    name: string
-  }
-  categories?: {
-    name: string
-  }
-  weight_units?: {
-    name: string
-  }
-  distance_units?: {
-    name: string
-  }
-}
+import { Workout } from '@/lib/types'
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([])

@@ -8,42 +8,7 @@ import ProtectedLayout from '@/components/ProtectedLayout'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
-
-interface Exercise {
-  id: number
-  name: string
-  category: number
-  measurement_type: number
-  categories?: {
-    name: string
-  }[]
-  measurement_types?: {
-    name: string
-  }[]
-}
-
-interface WeightUnit {
-  id: number
-  name: string
-}
-
-interface DistanceUnit {
-  id: number
-  name: string
-}
-
-interface WorkoutData {
-  date: string
-  exercise: number
-  category: number
-  comment: string
-  weight?: number
-  weight_unit?: number
-  reps?: number
-  distance?: number
-  distance_unit?: number
-  time?: string
-}
+import { Exercise, WeightUnit, DistanceUnit, WorkoutData } from '@/lib/types'
 
 export default function AddWorkoutPage() {
   const params = useParams()
@@ -79,9 +44,8 @@ export default function AddWorkoutPage() {
             id,
             name,
             category,
-            measurement_type,
-            categories(name),
-            measurement_types(name)
+            measurement_type:measurement_types(name),
+            categories(name)
           `)
           .eq('id', exerciseId)
           .single()
@@ -110,7 +74,7 @@ export default function AddWorkoutPage() {
           throw distanceError
         }
 
-        setExercise(exerciseData)
+        setExercise(exerciseData as unknown as Exercise)
         setWeightUnits(weightData || [])
         setDistanceUnits(distanceData || [])
 
@@ -147,7 +111,7 @@ export default function AddWorkoutPage() {
       const workoutData: WorkoutData = {
         date: formData.date,
         exercise: parseInt(exerciseId),
-        category: exercise.category,
+        category: exercise?.category || 0,
         comment: formData.comment || ''
       }
 
@@ -188,7 +152,7 @@ export default function AddWorkoutPage() {
     }
   }
 
-  const measurementType = exercise?.measurement_types?.[0]?.name
+  const measurementType = exercise?.measurement_type?.name
 
   if (loading) {
     return (
@@ -237,11 +201,11 @@ export default function AddWorkoutPage() {
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Add Workout</h1>
                 <p className="mt-2 text-gray-600">
-                  {exercise?.name} • {exercise?.categories?.[0]?.name}
+                  {exercise?.name} • {exercise?.categories?.name}
                 </p>
               </div>
               <Link
-                href={`/categories/${exercise?.category}`}
+                href={`/categories/${exercise?.category || ''}`}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
                 ← Back to Exercises
@@ -317,33 +281,53 @@ export default function AddWorkoutPage() {
                 </div>
               )}
 
-              {/* Distance (for distance-based exercises) */}
+              {/* Distance & Time (for distance-based exercises) */}
               {measurementType === 'distance' && (
-                <div>
-                  <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
-                    Distance
-                  </label>
-                  <div className="flex gap-2">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
+                      Distance
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        id="distance"
+                        step="0.1"
+                        min="0"
+                        required
+                        value={formData.distance}
+                        onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="5.0"
+                      />
+                      <select
+                        value={formData.distance_unit}
+                        onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
+                        className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        {distanceUnits.map(unit => (
+                          <option key={unit.id} value={unit.id}>{unit.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
+                      Time (optional)
+                    </label>
                     <input
-                      type="number"
-                      id="distance"
-                      step="0.1"
-                      min="0"
-                      required
-                      value={formData.distance}
-                      onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="5.0"
+                      type="text"
+                      id="time"
+                      pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
+                      value={formData.time}
+                      onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="00:30:00"
                     />
-                    <select
-                      value={formData.distance_unit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {distanceUnits.map(unit => (
-                        <option key={unit.id} value={unit.id}>{unit.name}</option>
-                      ))}
-                    </select>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Format: HH:MM:SS (e.g., 00:30:00)
+                    </p>
                   </div>
                 </div>
               )}
@@ -400,11 +384,11 @@ export default function AddWorkoutPage() {
                   variant="rainbow"
                   className="flex-1"
                 >
-                  {submitting ? '💫 Saving...' : '✨ Save Workout'}
+                  {submitting ? 'Saving...' : 'Save Workout'}
                 </Button>
 
                 <Button
-                  href={`/categories/${exercise?.category}`}
+                  href={`/categories/${exercise?.category || ''}`}
                   variant="outline"
                 >
                   Cancel

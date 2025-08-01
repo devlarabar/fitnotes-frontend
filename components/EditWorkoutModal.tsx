@@ -6,34 +6,7 @@ import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes, faTrash } from '@fortawesome/free-solid-svg-icons'
-
-interface Workout {
-  id: number
-  date: string
-  exercise: number
-  category: number
-  weight?: number
-  weight_unit?: number
-  reps?: number
-  distance?: number
-  distance_unit?: number
-  time?: string
-  comment?: string
-  exercises?: { name: string }
-  categories?: { name: string }
-  weight_units?: { name: string }
-  distance_units?: { name: string }
-}
-
-interface WeightUnit {
-  id: number
-  name: string
-}
-
-interface DistanceUnit {
-  id: number
-  name: string
-}
+import { Workout, WeightUnit, DistanceUnit } from '@/lib/types'
 
 interface EditWorkoutModalProps {
   workout: Workout | null
@@ -88,12 +61,12 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSuccess }
       // Get measurement type for this exercise
       const { data: exerciseData, error: exerciseError } = await supabase
         .from('exercises')
-        .select('measurement_type, measurement_types(name)')
+        .select('measurement_type(name)')
         .eq('id', workout.exercise)
         .single()
 
       if (exerciseError) throw exerciseError
-      setMeasurementType(exerciseData.measurement_types?.[0]?.name || '')
+      setMeasurementType((exerciseData.measurement_type as unknown as { name: string })?.name || '')
 
       // Fetch units
       const [weightResponse, distanceResponse] = await Promise.all([
@@ -186,7 +159,7 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSuccess }
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} maxWidth="md">
+    <Modal isOpen={isOpen} onClose={onClose} maxWidth="lg">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-semibold text-gray-900">Edit Workout</h2>
@@ -218,12 +191,12 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSuccess }
 
         {/* Weight & Reps (for reps-based exercises) */}
         {measurementType === 'reps' && (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
                 Weight
               </label>
-              <div className="flex gap-2">
+              <div className="space-y-2">
                 <input
                   type="number"
                   id="weight"
@@ -231,12 +204,12 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSuccess }
                   min="0"
                   value={formData.weight}
                   onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
                 />
                 <select
                   value={formData.weight_unit}
                   onChange={(e) => setFormData(prev => ({ ...prev, weight_unit: e.target.value }))}
-                  className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
                 >
                   {weightUnits.map(unit => (
                     <option key={unit.id} value={unit.id}>{unit.name}</option>
@@ -262,32 +235,50 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSuccess }
           </div>
         )}
 
-        {/* Distance (for distance-based exercises) */}
+        {/* Distance & Time (for distance-based exercises) */}
         {measurementType === 'distance' && (
-          <div>
-            <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-1">
-              Distance
-            </label>
-            <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-1">
+                Distance
+              </label>
+              <div className="space-y-2">
+                <input
+                  type="number"
+                  id="distance"
+                  step="0.1"
+                  min="0"
+                  required
+                  value={formData.distance}
+                  onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                  placeholder="5.0"
+                />
+                <select
+                  value={formData.distance_unit}
+                  onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                >
+                  {distanceUnits.map(unit => (
+                    <option key={unit.id} value={unit.id}>{unit.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="distance-time" className="block text-sm font-medium text-gray-700 mb-1">
+                Time (optional)
+              </label>
               <input
-                type="number"
-                id="distance"
-                step="0.1"
-                min="0"
-                required
-                value={formData.distance}
-                onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                type="text"
+                id="distance-time"
+                pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
+                value={formData.time}
+                onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+                placeholder="00:30:00"
               />
-              <select
-                value={formData.distance_unit}
-                onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
-                className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
-              >
-                {distanceUnits.map(unit => (
-                  <option key={unit.id} value={unit.id}>{unit.name}</option>
-                ))}
-              </select>
             </div>
           </div>
         )}
@@ -344,16 +335,16 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSuccess }
             {loading ? '💫 Saving...' : '✨ Save Changes'}
           </Button>
 
-                     <Button
-             type="button"
-             onClick={handleDelete}
-             variant="outline"
-             disabled={loading}
-             className="border-red-300 text-red-600 hover:bg-red-50"
-           >
-             <FontAwesomeIcon icon={faTrash} className="mr-2" />
-             Delete
-           </Button>
+          <Button
+            type="button"
+            onClick={handleDelete}
+            variant="outline"
+            disabled={loading}
+            className="border-red-300 text-red-600 hover:bg-red-50"
+          >
+            <FontAwesomeIcon icon={faTrash} className="mr-2" />
+            Delete
+          </Button>
 
           <Button
             type="button"

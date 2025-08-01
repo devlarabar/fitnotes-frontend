@@ -6,11 +6,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
-
-interface Category {
-  id: number
-  name: string
-}
+import { Category } from '@/lib/types'
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([])
