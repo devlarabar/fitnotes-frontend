@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  color: #000000;
+  background: #e5e0e0;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Pretty scrollbars for table */
+.workout-table-wrapper {
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+.workout-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.workout-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.workout-table-wrapper::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  border: 1px solid #f1f5f9;
+}
+
+.workout-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.workout-table-wrapper::-webkit-scrollbar-corner {
+  background: #f1f5f9;
+}
