@@ -22,12 +22,26 @@ export default function Home() {
 
         {/* Navigation */}
         <div className="mb-12 text-center">
-          <Link
-            href="/workouts"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-          >
-            View Workouts
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/today"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 transition-colors"
+            >
+              Today&apos;s Workouts 🗓️
+            </Link>
+            <Link
+              href="/workouts"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+            >
+              View All Workouts 📊
+            </Link>
+            <Link
+              href="/categories"
+              className="inline-flex items-center px-6 py-3 border border-blue-600 text-base font-medium rounded-md shadow-sm text-blue-600 bg-white hover:bg-blue-50 transition-colors"
+            >
+              Add Workout 💪
+            </Link>
+          </div>
         </div>
 
         {/* Lorem Ipsum Content */}
