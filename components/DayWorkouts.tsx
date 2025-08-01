@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { Workout } from '@/lib/types'
+import BackButton from './ui/BackButton'
 
 interface GroupedWorkout {
   exercise: {
@@ -188,12 +189,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
               >
                 + Add Workout
               </Link>
-              <Link
-                href="/"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                ← Home
-              </Link>
+              <BackButton>← Home</BackButton>
             </div>
           </div>
         </div>
@@ -222,14 +218,14 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
             <div className="text-gray-400 text-6xl mb-4">🏋️</div>
             <h3 className="text-xl font-medium text-gray-900 mb-2">No workouts {title ? 'today' : 'recorded'}</h3>
             <p className="text-gray-500 mb-6">
-              {title ? 'Ready to start your workout for today?' : 'Start your fitness journey by adding your first workout!'}
+              Get the fuck up, dude.
             </p>
             <Button
               href={`/categories?date=${date}`}
-              variant="rainbow"
+              variant="secondary"
               size="lg"
             >
-              {title ? 'Add Your First Workout ✨' : 'Add Your First Workout'}
+              Start Workout
             </Button>
           </div>
         ) : (

@@ -8,6 +8,8 @@ import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Exercise, Category } from '@/lib/types'
+import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
+import BackButton from '@/components/ui/BackButton'
 
 export default function ExercisesPage() {
   const params = useParams()
@@ -98,12 +100,7 @@ export default function ExercisesPage() {
             </div>
           </div>
           <div className="mt-6">
-            <Link
-              href="/categories"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-            >
-              ← Back to Categories
-            </Link>
+            <BackButton>← Back to Categories</BackButton>
           </div>
         </div>
       </div>
@@ -125,12 +122,7 @@ export default function ExercisesPage() {
                   Choose an exercise to add to your workout
                 </p>
               </div>
-              <Link
-                href="/categories"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                ← Back to Categories
-              </Link>
+              <BackButton>← Back to Categories</BackButton>
             </div>
           </div>
 
@@ -140,8 +132,9 @@ export default function ExercisesPage() {
               <Link
                 key={exercise.id}
                 href={`/exercises/${exercise.id}/add${date ? `?date=${date}` : ''}`}
-                className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 p-4"
+                className="group"
               >
+                <GradientBorderContainer>
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <h3 className="text-lg font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
@@ -157,6 +150,7 @@ export default function ExercisesPage() {
                     </span>
                   </div>
                 </div>
+                </GradientBorderContainer>
               </Link>
             ))}
           </div>

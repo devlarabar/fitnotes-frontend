@@ -6,9 +6,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Button from '@/components/ui/Button'
-import Link from 'next/link'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Exercise, WeightUnit, DistanceUnit, WorkoutData } from '@/lib/types'
+import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
+import BackButton from '@/components/ui/BackButton'
 
 export default function AddWorkoutPage() {
   const params = useParams()
@@ -206,17 +207,12 @@ export default function AddWorkoutPage() {
                   {exercise?.name} • {exercise?.categories?.name}
                 </p>
               </div>
-              <Link
-                href={`/categories/${exercise?.category || ''}`}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                ← Back to Exercises
-              </Link>
+              <BackButton>← Back to Exercises</BackButton>
             </div>
           </div>
 
           {/* Form */}
-          <div className="bg-white shadow-lg rounded-lg border border-gray-200">
+          <GradientBorderContainer>
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Date */}
               <div>
@@ -397,7 +393,7 @@ export default function AddWorkoutPage() {
                 </Button>
               </div>
             </form>
-          </div>
+          </GradientBorderContainer>
         </div>
       </div>
     </ProtectedLayout>

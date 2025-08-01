@@ -9,6 +9,7 @@ import WorkoutTable from '@/components/WorkoutTable'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 import { Workout } from '@/lib/types'
+import BackButton from '@/components/ui/BackButton'
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([])
@@ -102,12 +103,7 @@ export default function WorkoutsPage() {
             </div>
           </div>
           <div className="mt-6">
-            <Link
-              href="/"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
-            >
-              ← Back to Home
-            </Link>
+            <BackButton>← Back to Home</BackButton>
           </div>
         </div>
       </div>
@@ -127,12 +123,7 @@ export default function WorkoutsPage() {
                   Track and review your fitness progress
                 </p>
               </div>
-              <Link
-                href="/"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
-              >
-                ← Back to Home
-              </Link>
+              <BackButton>← Back to Home</BackButton>
             </div>
           </div>
 
