@@ -7,13 +7,15 @@ import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Button from '@/components/ui/Button'
 import Link from 'next/link'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { Exercise, WeightUnit, DistanceUnit, WorkoutData } from '@/lib/types'
 
 export default function AddWorkoutPage() {
   const params = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const exerciseId = params.id as string
+  const dateParam = searchParams.get('date')
 
   const [exercise, setExercise] = useState<Exercise | null>(null)
   const [weightUnits, setWeightUnits] = useState<WeightUnit[]>([])
@@ -24,7 +26,7 @@ export default function AddWorkoutPage() {
 
   // Form state
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0], // Today's date
+    date: dateParam || new Date().toISOString().split('T')[0], // Use date parameter or today's date
     weight: '',
     weight_unit: '',
     reps: '',
@@ -142,8 +144,8 @@ export default function AddWorkoutPage() {
         throw error
       }
 
-      // Success! Redirect to today's workouts page
-      router.push('/today')
+      // Success! Redirect to the day's workouts page
+      router.push(`/day/${workoutData.date}`)
     } catch (err) {
       console.error('Error saving workout:', err)
       setError(err instanceof Error ? err.message : 'Failed to save workout')

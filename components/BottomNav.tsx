@@ -12,6 +12,8 @@ export default function BottomNav() {
   const { user, signOut } = useAuth()
   const [showLogout, setShowLogout] = useState(false)
 
+  const today = new Date().toISOString().split('T')[0]
+  
   const navItems = [
     {
       href: '/',
@@ -20,10 +22,10 @@ export default function BottomNav() {
       active: pathname === '/'
     },
     {
-      href: '/today',
+      href: `/day/${today}`,
       icon: '🗓️',
       label: 'Today',
-      active: pathname === '/today'
+      active: pathname === `/day/${today}` || pathname === '/today'
     },
     {
       href: '/categories',
@@ -31,6 +33,12 @@ export default function BottomNav() {
       label: 'Add',
       active: pathname.startsWith('/categories') || pathname.startsWith('/exercises'),
       isAdd: true
+    },
+    {
+      href: '/calendar',
+      icon: '📅',
+      label: 'Calendar',
+      active: pathname === '/calendar'
     },
     {
       href: '#',

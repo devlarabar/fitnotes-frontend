@@ -6,9 +6,13 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Category } from '@/lib/types'
 
 export default function CategoriesPage() {
+  const searchParams = useSearchParams()
+  const date = searchParams.get('date')
+  
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -109,7 +113,7 @@ export default function CategoriesPage() {
           {categories.map((category) => (
             <Link
               key={category.id}
-              href={`/categories/${category.id}`}
+              href={`/categories/${category.id}${date ? `?date=${date}` : ''}`}
               className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200 overflow-hidden"
             >
               <div className="p-6">

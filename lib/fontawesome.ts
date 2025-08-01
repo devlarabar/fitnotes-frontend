@@ -17,7 +17,9 @@ import {
   faSignOutAlt,
   faExclamationCircle,
   faCheckCircle,
-  faRunning
+  faRunning,
+  faChevronLeft,
+  faChevronRight
 } from '@fortawesome/free-solid-svg-icons'
 
 // Add icons to the library so they can be used throughout the app
@@ -38,5 +40,7 @@ library.add(
   faSignOutAlt,
   faExclamationCircle,
   faCheckCircle,
-  faRunning
+  faRunning,
+  faChevronLeft,
+  faChevronRight
 )

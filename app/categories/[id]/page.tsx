@@ -6,12 +6,14 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { Exercise, Category } from '@/lib/types'
 
 export default function ExercisesPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const categoryId = params.id as string
+  const date = searchParams.get('date')
 
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [category, setCategory] = useState<Category | null>(null)
@@ -137,7 +139,7 @@ export default function ExercisesPage() {
             {exercises.map((exercise) => (
               <Link
                 key={exercise.id}
-                href={`/exercises/${exercise.id}/add`}
+                href={`/exercises/${exercise.id}/add${date ? `?date=${date}` : ''}`}
                 className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 p-4"
               >
                 <div className="flex items-center justify-between">
