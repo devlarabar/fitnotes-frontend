@@ -1,5 +1,8 @@
 'use client'
 
+// Force dynamic rendering to prevent build-time data fetching
+export const dynamic = 'force-dynamic'
+
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import WorkoutTable from '@/components/WorkoutTable'
@@ -160,7 +163,7 @@ export default function WorkoutsPage() {
         {/* Workouts Table */}
         {loading && currentPage > 1 ? (
           <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-            <div className="overflow-x-auto h-[70vh] relative">
+            <div className="overflow-x-auto h-[60vh] relative">
               <div className="h-full flex items-center justify-center">
                 <div className="text-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
