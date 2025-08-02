@@ -55,7 +55,8 @@ function AddWorkoutContent() {
 
   const fetchSets = useCallback(async () => {
     try {
-      const { data, error } = await supabase
+      // Get today's sets
+      const { data: todaySets, error: setsError } = await supabase
         .from('workouts')
         .select(`
           *,
@@ -68,12 +69,104 @@ function AddWorkoutContent() {
         .eq('date', currentSet.date)
         .order('id', { ascending: true })
 
-      if (error) throw error
-      setSets(data || [])
+      if (setsError) throw setsError
+
+      // Get all historical data to calculate PRs (only when needed)
+      const { data: historicalSets, error: histError } = await supabase
+        .from('workouts')
+        .select('id, date, weight, reps, distance, time')
+        .eq('exercise', exerciseId)
+        .lte('date', currentSet.date)
+        .order('date', { ascending: true })
+
+      if (histError) throw histError
+
+      // Calculate PRs intelligently
+      const measurementType = exercise?.measurement_type?.name
+      const prIds = new Set<number>()
+
+      if (measurementType === 'reps') {
+        // Step 1: Find the heaviest weight for each rep count
+        const repToMaxWeight = new Map<number, { weight: number, id: number }>();
+        for (const set of (historicalSets || [])) {
+          const reps = set.reps || 0;
+          const weight = set.weight || 0;
+          if (weight > 0 && reps > 0) {
+            const current = repToMaxWeight.get(reps);
+            if (!current || weight > current.weight) {
+              repToMaxWeight.set(reps, { weight, id: set.id });
+            }
+          }
+        }
+        // Step 2: Apply FitNotes precedence rule
+        // A PR is valid if no higher rep count has an equal or greater weight
+        const actualPRs = Array.from(repToMaxWeight.entries());
+        for (const [reps, pr] of actualPRs) {
+          const isSuperseded = actualPRs.some(([otherReps, otherPR]) => {
+            return otherReps > reps && otherPR.weight >= pr.weight;
+          });
+          if (!isSuperseded) {
+            prIds.add(pr.id);
+          }
+        }
+      } else if (measurementType === 'distance') {
+        // For distance: could be max distance, or best time for each distance
+        const distancePRs = new Map<number, { time: number, id: number }>()
+        let maxDistancePR = { distance: 0, id: 0 }
+        
+        for (const set of (historicalSets || [])) {
+          const distance = set.distance || 0
+          
+          if (distance > maxDistancePR.distance) {
+            maxDistancePR = { distance, id: set.id }
+          }
+          
+          // If there's time data, track best time for each distance
+          if (set.time && distance > 0) {
+            const [h, m, s] = set.time.split(':').map(Number)
+            const timeSeconds = h * 3600 + m * 60 + s
+            
+            const current = distancePRs.get(distance)
+            if (!current || timeSeconds < current.time) {
+              distancePRs.set(distance, { time: timeSeconds, id: set.id })
+            }
+          }
+        }
+        
+        prIds.add(maxDistancePR.id)
+        distancePRs.forEach(pr => prIds.add(pr.id))
+        
+      } else if (measurementType === 'time') {
+        // For time: best (shortest) time
+        let bestTime = Infinity
+        let bestId = 0
+        
+        for (const set of (historicalSets || [])) {
+          if (set.time) {
+            const [h, m, s] = set.time.split(':').map(Number)
+            const timeSeconds = h * 3600 + m * 60 + s
+            
+            if (timeSeconds < bestTime) {
+              bestTime = timeSeconds
+              bestId = set.id
+            }
+          }
+        }
+        
+        if (bestId > 0) prIds.add(bestId)
+      }
+
+      // Mark today's sets with PR status
+      const setsWithPRs = (todaySets || []).map(set => ({
+        ...set,
+        is_pr: prIds.has(set.id)
+      }))
+
+      setSets(setsWithPRs)
     } catch (err) {
       console.error('Error fetching sets:', err)
     }
-  }, [exerciseId, currentSet.date])
+  }, [exerciseId, currentSet.date, exercise?.measurement_type?.name])
 
   const fetchAllSets = useCallback(async () => {
     try {
@@ -192,17 +285,7 @@ function AddWorkoutContent() {
       // Refresh both sets and allSets
       await Promise.all([fetchSets(), fetchAllSets()])
 
-      // Clear the form if it was a new set
-      if (!editingSetId) {
-        setCurrentSet(prev => ({
-          ...prev,
-          weight: 0,
-          reps: 1,
-          distance: 0,
-          time: '',
-          comment: ''
-        }))
-      }
+      // Keep the form values as-is after saving
 
       // Clear edit mode
       setEditingSetId(null)
@@ -216,14 +299,7 @@ function AddWorkoutContent() {
   }
 
   const clearSet = () => {
-    setCurrentSet(prev => ({
-      ...prev,
-      weight: 0,
-      reps: 1,
-      distance: 0,
-      time: '',
-      comment: ''
-    }))
+    // Only clear editing state, keep input values
     setEditingSetId(null)
     setError(null)
   }
