@@ -192,7 +192,7 @@ export default function CalendarPage() {
                     <span className="text-sm">{day}</span>
                     {workout && (
                       <>
-                        {workout.count > 1 && (
+                        {workout.count >= 1 && (
                           <div className="absolute bottom-1 right-1 w-5 h-5 bg-emerald-600 rounded-full flex items-center justify-center">
                             <span className="text-xs text-white font-bold leading-none">{workout.count}</span>
                           </div>
