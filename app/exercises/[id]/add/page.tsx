@@ -11,6 +11,7 @@ import BackButton from '@/components/ui/BackButton'
 import Modal from '@/components/ui/Modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
 function AddWorkoutContent() {
   const params = useParams()
@@ -412,9 +413,9 @@ function AddWorkoutContent() {
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-4 px-6 text-sm font-bold transition-colors relative ${activeTab === tab
-                    ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                className={`hover:cursor-pointer flex-1 py-4 px-6 text-sm font-bold transition-colors relative ${activeTab === tab
+                  ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
               >
                 {tab}
@@ -738,8 +739,8 @@ function TrackTab({
           onClick={saveSet}
           disabled={saving}
           className={`flex-1 font-medium py-3 px-4 rounded-md disabled:opacity-50 text-white ${editingSetId
-              ? 'bg-green-500 hover:bg-green-600'
-              : 'bg-emerald-500 hover:bg-emerald-600'
+            ? 'bg-green-500 hover:bg-green-600'
+            : 'bg-emerald-500 hover:bg-emerald-600'
             }`}
         >
           {saving ? 'SAVING...' : editingSetId ? 'UPDATE' : 'SAVE'}
@@ -916,14 +917,216 @@ function HistoryTab({ allSets, exercise }: HistoryTabProps) {
   )
 }
 
+// ProgressChart Component
+interface ProgressChartProps {
+  data: ChartDataPoint[]
+  type: 'bar' | 'line'
+  label: string
+}
+
+function ProgressChart({ data, type, label }: ProgressChartProps) {
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  const chartData = data.map(point => ({
+    ...point,
+    date: formatDate(point.date)
+  }))
+
+  return (
+    <div className="h-64">
+      <ResponsiveContainer width="100%" height="100%">
+        {type === 'line' ? (
+          <LineChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis
+              dataKey="date"
+              stroke="#6b7280"
+              fontSize={12}
+              tickLine={false}
+            />
+            <YAxis
+              stroke="#6b7280"
+              fontSize={12}
+              tickLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}
+              labelStyle={{ color: '#374151' }}
+              formatter={(value: number) => [value, label]}
+            />
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#2563eb"
+              strokeWidth={3}
+              dot={{ fill: '#2563eb', strokeWidth: 0, r: 4 }}
+              activeDot={{ r: 6, stroke: '#2563eb', strokeWidth: 2, fill: 'white' }}
+            />
+          </LineChart>
+        ) : (
+          <BarChart data={chartData}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+            <XAxis
+              dataKey="date"
+              stroke="#6b7280"
+              fontSize={12}
+              tickLine={false}
+            />
+            <YAxis
+              stroke="#6b7280"
+              fontSize={12}
+              tickLine={false}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'white',
+                border: '1px solid #e5e7eb',
+                borderRadius: '8px',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}
+              labelStyle={{ color: '#374151' }}
+              formatter={(value: number) => [value, label]}
+            />
+            <Bar
+              dataKey="value"
+              fill="#2563eb"
+              radius={[4, 4, 0, 0]}
+            />
+          </BarChart>
+        )}
+      </ResponsiveContainer>
+    </div>
+  )
+}
+
 // GraphTab Component
 interface GraphTabProps {
   allSets: Workout[]
   exercise: Exercise | null
 }
 
+interface ChartDataPoint {
+  date: string
+  value: number
+  label: string
+}
+
 function GraphTab({ allSets, exercise }: GraphTabProps) {
+  const [chartType, setChartType] = useState<'bar' | 'line'>('line')
+  const [dateRange, setDateRange] = useState<'30' | '90' | 'all' | 'custom'>('30')
+  const [customStartDate, setCustomStartDate] = useState('')
+  const [customEndDate, setCustomEndDate] = useState('')
   const measurementType = exercise?.measurement_type?.name
+
+  // Filter sets based on date range
+  const getFilteredSets = (): Workout[] => {
+    if (!allSets.length) return []
+
+    const now = new Date()
+    let startDate: Date
+
+    switch (dateRange) {
+      case '30':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+        break
+      case '90':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+        break
+      case 'custom':
+        if (!customStartDate) return allSets
+        startDate = new Date(customStartDate)
+        const endDate = customEndDate ? new Date(customEndDate) : now
+        return allSets.filter(set => {
+          const setDate = new Date(set.date)
+          return setDate >= startDate && setDate <= endDate
+        })
+      case 'all':
+      default:
+        return allSets
+    }
+
+    return allSets.filter(set => new Date(set.date) >= startDate)
+  }
+
+  // Calculate progress data based on measurement type
+  const calculateProgressData = (): ChartDataPoint[] => {
+    const filteredSets = getFilteredSets()
+    if (!filteredSets.length) return []
+
+    const dailyData = new Map<string, Workout[]>()
+
+    // Group sets by date
+    filteredSets.forEach(set => {
+      const date = set.date
+      if (!dailyData.has(date)) {
+        dailyData.set(date, [])
+      }
+      dailyData.get(date)!.push(set)
+    })
+
+    // Calculate progress metric for each day
+    const progressData: ChartDataPoint[] = []
+
+    dailyData.forEach((sets, date) => {
+      let value: number
+      let label: string
+
+      if (measurementType === 'reps') {
+        // For weight + reps: calculate volume (weight × reps) or max weight
+        const hasWeight = sets.some(set => set.weight && set.weight > 0)
+        if (hasWeight) {
+          // Total volume for the day
+          value = sets.reduce((sum, set) => sum + (set.weight || 0) * (set.reps || 0), 0)
+          label = 'Volume (weight×reps)'
+        } else {
+          // Just reps
+          value = sets.reduce((sum, set) => sum + (set.reps || 0), 0)
+          label = 'Total Reps'
+        }
+      } else if (measurementType === 'distance') {
+        const hasTime = sets.some(set => set.time)
+        if (hasTime) {
+          // Distance per time (speed)
+          const totalDistance = sets.reduce((sum, set) => sum + (set.distance || 0), 0)
+          const totalTimeMinutes = sets.reduce((sum, set) => {
+            if (!set.time) return sum
+            const [minutes, seconds] = set.time.split(':').map(Number)
+            return sum + minutes + (seconds || 0) / 60
+          }, 0)
+          value = totalTimeMinutes > 0 ? totalDistance / totalTimeMinutes : totalDistance
+          label = 'Speed (km/min)'
+        } else {
+          // Just distance
+          value = sets.reduce((sum, set) => sum + (set.distance || 0), 0)
+          label = 'Total Distance'
+        }
+      } else {
+        // Default: count sets
+        value = sets.length
+        label = 'Sets Completed'
+      }
+
+      progressData.push({
+        date,
+        value: Math.round(value * 100) / 100, // Round to 2 decimal places
+        label
+      })
+    })
+
+    // Sort by date
+    return progressData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  }
+
+  const progressData = calculateProgressData()
+  const progressLabel = progressData[0]?.label || 'Progress'
 
   // Calculate stats
   const totalSets = allSets.length
@@ -987,13 +1190,91 @@ function GraphTab({ allSets, exercise }: GraphTabProps) {
             </div>
           )}
 
-          {/* Placeholder for future charts */}
-          <div className="bg-gray-50 rounded-lg p-8 text-center">
-            <div className="text-gray-400 text-3xl mb-2">📊</div>
-            <p className="text-sm text-gray-500">
-              Progress charts coming soon!
-            </p>
-          </div>
+          {/* Progress Chart */}
+          {progressData.length > 0 && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              {/* Chart Controls */}
+              <div className="flex flex-col gap-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-medium text-gray-900">Progress Over Time</h3>
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setChartType('line')}
+                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${chartType === 'line'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                      Line
+                    </button>
+                    <button
+                      onClick={() => setChartType('bar')}
+                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${chartType === 'bar'
+                        ? 'bg-white text-blue-600 shadow-sm'
+                        : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                    >
+                      Bar
+                    </button>
+                  </div>
+                </div>
+
+                {/* Date Range Controls */}
+                <div className="flex flex-col gap-3">
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { value: '30', label: 'Last 30 Days' },
+                      { value: '90', label: 'Last 90 Days' },
+                      { value: 'all', label: 'All Time' },
+                      { value: 'custom', label: 'Custom' }
+                    ].map((option) => (
+                      <button
+                        key={option.value}
+                        onClick={() => setDateRange(option.value as '30' | '90' | 'all' | 'custom')}
+                        className={`hover:cursor-pointer px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${dateRange === option.value
+                            ? 'bg-blue-50 text-blue-700 border-blue-200'
+                            : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                          }`}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Custom Date Range Inputs */}
+                  {dateRange === 'custom' && (
+                    <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm text-gray-600">From:</label>
+                        <input
+                          type="date"
+                          value={customStartDate}
+                          onChange={(e) => setCustomStartDate(e.target.value)}
+                          className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <label className="text-sm text-gray-600">To:</label>
+                        <input
+                          type="date"
+                          value={customEndDate}
+                          onChange={(e) => setCustomEndDate(e.target.value)}
+                          className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Chart */}
+              <ProgressChart
+                data={progressData}
+                type={chartType}
+                label={progressLabel}
+              />
+            </div>
+          )}
         </div>
       )}
     </div>
