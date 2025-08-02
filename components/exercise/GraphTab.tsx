@@ -47,73 +47,87 @@ export default function GraphTab({ allSets, exercise }: GraphTabProps) {
   }
 
   // Calculate progress data based on measurement type
+  const calculateEstimated1RM = (weight: number, reps: number) => {
+    if (!weight || !reps) return 0;
+    return Math.round(weight * (1 + reps / 30));
+  };
+
   const calculateProgressData = (): ChartDataPoint[] => {
-    const filteredSets = getFilteredSets()
-    if (!filteredSets.length) return []
+    const filteredSets = getFilteredSets();
+    if (!filteredSets.length) return [];
 
-    const dailyData = new Map<string, Workout[]>()
-
-    // Group sets by date
-    filteredSets.forEach(set => {
-      const date = set.date
-      if (!dailyData.has(date)) {
-        dailyData.set(date, [])
-      }
-      dailyData.get(date)!.push(set)
-    })
-
-    // Calculate progress metric for each day
-    const progressData: ChartDataPoint[] = []
-
-    dailyData.forEach((sets, date) => {
-      let value: number
-      let label: string
-
-      if (measurementType === 'reps') {
-        // For weight + reps: calculate volume (weight × reps) or max weight
-        const hasWeight = sets.some(set => set.weight && set.weight > 0)
-        if (hasWeight) {
-          // Total volume for the day
-          value = sets.reduce((sum, set) => sum + (set.weight || 0) * (set.reps || 0), 0)
-          label = 'Volume (weight×reps)'
-        } else {
-          // Just reps
-          value = sets.reduce((sum, set) => sum + (set.reps || 0), 0)
-          label = 'Total Reps'
+    if (measurementType === 'reps') {
+      // For each day, find the set with the highest estimated 1RM
+      const dailyBest: Record<string, number> = {};
+      filteredSets.forEach(set => {
+        const est1RM = calculateEstimated1RM(set.weight || 0, set.reps || 0);
+        if (!dailyBest[set.date] || est1RM > dailyBest[set.date]) {
+          dailyBest[set.date] = est1RM;
         }
-      } else if (measurementType === 'distance') {
-        const hasTime = sets.some(set => set.time)
+      });
+      return Object.entries(dailyBest).map(([date, value]) => ({
+        date,
+        value,
+        label: 'Estimated 1RM',
+      })).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
+
+    // For distance:
+    if (measurementType === 'distance') {
+      const dailyData = new Map<string, Workout[]>();
+      filteredSets.forEach(set => {
+        const date = set.date;
+        if (!dailyData.has(date)) {
+          dailyData.set(date, []);
+        }
+        dailyData.get(date)!.push(set);
+      });
+      const progressData: ChartDataPoint[] = [];
+      dailyData.forEach((sets, date) => {
+        const hasTime = sets.some(set => set.time);
+        let value: number;
+        let label: string;
         if (hasTime) {
-          // Distance per time (speed)
-          const totalDistance = sets.reduce((sum, set) => sum + (set.distance || 0), 0)
+          const totalDistance = sets.reduce((sum, set) => sum + (set.distance || 0), 0);
           const totalTimeMinutes = sets.reduce((sum, set) => {
-            if (!set.time) return sum
-            const [minutes, seconds] = set.time.split(':').map(Number)
-            return sum + minutes + (seconds || 0) / 60
-          }, 0)
-          value = totalTimeMinutes > 0 ? totalDistance / totalTimeMinutes : totalDistance
-          label = 'Speed (km/min)'
+            if (!set.time) return sum;
+            const [minutes, seconds] = set.time.split(':').map(Number);
+            return sum + minutes + (seconds || 0) / 60;
+          }, 0);
+          value = totalTimeMinutes > 0 ? totalDistance / totalTimeMinutes : totalDistance;
+          label = 'Speed (km/min)';
         } else {
-          // Just distance
-          value = sets.reduce((sum, set) => sum + (set.distance || 0), 0)
-          label = 'Total Distance'
+          value = sets.reduce((sum, set) => sum + (set.distance || 0), 0);
+          label = 'Total Distance';
         }
-      } else {
-        // Default: count sets
-        value = sets.length
-        label = 'Sets Completed'
-      }
+        progressData.push({
+          date,
+          value: Math.round(value * 100) / 100,
+          label,
+        });
+      });
+      return progressData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    }
 
+    // Default: count sets
+    const dailyData = new Map<string, Workout[]>();
+    filteredSets.forEach(set => {
+      const date = set.date;
+      if (!dailyData.has(date)) {
+        dailyData.set(date, []);
+      }
+      dailyData.get(date)!.push(set);
+    });
+    const progressData: ChartDataPoint[] = [];
+    dailyData.forEach((sets, date) => {
       progressData.push({
         date,
-        value: Math.round(value * 100) / 100, // Round to 2 decimal places
-        label
-      })
-    })
-
-    // Sort by date
-    return progressData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-  }
+        value: sets.length,
+        label: 'Sets Completed',
+      });
+    });
+    return progressData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  };
 
   const progressData = calculateProgressData()
   const progressLabel = progressData[0]?.label || 'Progress'

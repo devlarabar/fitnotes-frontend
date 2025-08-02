@@ -107,7 +107,7 @@ export default function BottomNav() {
                   href={item.href}
                   className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg transition-all duration-200 ${item.active
                     ? item.isAdd
-                      ? 'bg-gradient-to-r from-purple-400 to-pink-400 text-white shadow-lg scale-110'
+                      ? 'bg-gradient-to-br from-purple-400 to-pink-400 text-white shadow-lg scale-110'
                       : 'bg-blue-50 text-blue-600'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                     } ${item.isAdd ? 'transform' : ''}`}
