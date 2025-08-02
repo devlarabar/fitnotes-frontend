@@ -180,91 +180,95 @@ export default function GraphTab({ allSets, exercise }: GraphTabProps) {
             </div>
           )}
 
-          {/* Progress Chart */}
-          {progressData.length > 0 && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              {/* Chart Controls */}
-              <div className="flex flex-col gap-4 mb-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium text-gray-900">Progress Over Time</h3>
-                  <div className="flex bg-gray-100 rounded-lg p-1">
-                    <button
-                      onClick={() => setChartType('line')}
-                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${chartType === 'line'
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    >
-                      Line
-                    </button>
-                    <button
-                      onClick={() => setChartType('bar')}
-                      className={`px-3 py-1 text-sm font-medium rounded transition-colors ${chartType === 'bar'
-                        ? 'bg-white text-blue-600 shadow-sm'
-                        : 'text-gray-600 hover:text-gray-900'
-                        }`}
-                    >
-                      Bar
-                    </button>
-                  </div>
-                </div>
-
-                {/* Date Range Controls */}
-                <div className="flex flex-col gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { value: '30', label: 'Last 30 Days' },
-                      { value: '90', label: 'Last 90 Days' },
-                      { value: 'all', label: 'All Time' },
-                      { value: 'custom', label: 'Custom' }
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setDateRange(option.value as '30' | '90' | 'all' | 'custom')}
-                        className={`hover:cursor-pointer px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${dateRange === option.value
-                          ? 'bg-blue-50 text-blue-700 border-blue-200'
-                          : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                          }`}
-                      >
-                        {option.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Custom Date Range Inputs */}
-                  {dateRange === 'custom' && (
-                    <div className="flex gap-3 items-center">
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm text-gray-600">From:</label>
-                        <input
-                          type="date"
-                          value={customStartDate}
-                          onChange={(e) => setCustomStartDate(e.target.value)}
-                          className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <label className="text-sm text-gray-600">To:</label>
-                        <input
-                          type="date"
-                          value={customEndDate}
-                          onChange={(e) => setCustomEndDate(e.target.value)}
-                          className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-                  )}
+          {/* Progress Chart (always render controls and chart) */}
+          <div className="bg-white rounded-lg border border-gray-200 p-6">
+            {/* Chart Controls */}
+            <div className="flex flex-col gap-4 mb-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-gray-900">Progress Over Time</h3>
+                <div className="flex bg-gray-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setChartType('line')}
+                    className={`px-3 py-1 text-sm font-medium rounded transition-colors ${chartType === 'line'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Line
+                  </button>
+                  <button
+                    onClick={() => setChartType('bar')}
+                    className={`px-3 py-1 text-sm font-medium rounded transition-colors ${chartType === 'bar'
+                      ? 'bg-white text-blue-600 shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Bar
+                  </button>
                 </div>
               </div>
 
-              {/* Chart */}
+              {/* Date Range Controls */}
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { value: '30', label: 'Last 30 Days' },
+                    { value: '90', label: 'Last 90 Days' },
+                    { value: 'all', label: 'All Time' },
+                    { value: 'custom', label: 'Custom' }
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setDateRange(option.value as '30' | '90' | 'all' | 'custom')}
+                      className={`hover:cursor-pointer px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${dateRange === option.value
+                        ? 'bg-blue-50 text-blue-700 border-blue-200'
+                        : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Custom Date Range Inputs */}
+                {dateRange === 'custom' && (
+                  <div className="flex gap-3 items-center">
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-600">From:</label>
+                      <input
+                        type="date"
+                        value={customStartDate}
+                        onChange={(e) => setCustomStartDate(e.target.value)}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <label className="text-sm text-gray-600">To:</label>
+                      <input
+                        type="date"
+                        value={customEndDate}
+                        onChange={(e) => setCustomEndDate(e.target.value)}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Chart or No Data Message */}
+            {progressData.length > 0 ? (
               <ProgressChart
                 data={progressData}
                 type={chartType}
                 label={progressLabel}
               />
-            </div>
-          )}
+            ) : (
+              <div className="text-center text-gray-400 py-12">
+                No data for this exercise in the selected date range.
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
