@@ -2,16 +2,15 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
-import ProtectedLayout from '@/components/ProtectedLayout'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Exercise, WeightUnit, DistanceUnit, WorkoutData, Workout } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
 import Modal from '@/components/ui/Modal'
-import TrackTab from '@/components/exercise/TrackTab'
-import HistoryTab from '@/components/exercise/HistoryTab'
-import GraphTab from '@/components/exercise/GraphTab'
+import ExerciseTabs from '@/components/exercise/ExerciseTabs'
+import Button from '@/components/ui/Button'
+import SuspenseFallback from '@/components/misc/SuspenseFallback'
 
 function AddWorkoutContent() {
   const params = useParams()
@@ -39,8 +38,7 @@ function AddWorkoutContent() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deletingSetId, setDeletingSetId] = useState<number | null>(null)
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState<'TRACK' | 'HISTORY' | 'GRAPH'>('TRACK')
+
   const [allSets, setAllSets] = useState<Workout[]>([])
 
   // Tracking state for current set
@@ -339,63 +337,25 @@ function AddWorkoutContent() {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="bg-white rounded-t-lg shadow-md border-2 border-gray-300 border-b-0 mb-0 relative z-10">
-          <div className="flex border-b border-gray-200">
-            {(['TRACK', 'HISTORY', 'GRAPH'] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`hover:cursor-pointer flex-1 py-4 px-6 text-sm font-bold transition-colors relative ${activeTab === tab
-                  ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-              >
-                {tab}
-                {activeTab === tab && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab Content */}
-        <div className="bg-white rounded-b-lg shadow-md border-2 border-gray-300 border-t-0 overflow-hidden relative z-10">
-          {activeTab === 'TRACK' && (
-            <TrackTab
-              currentSet={currentSet}
-              setCurrentSet={setCurrentSet}
-              saveSet={saveSet}
-              clearSet={clearSet}
-              saving={saving}
-              error={error}
-              sets={sets}
-              editingSetId={editingSetId}
-              handleSetClick={handleSetClick}
-              handleCommentClick={handleCommentClick}
-              handleDeleteClick={handleDeleteClick}
-              exercise={exercise}
-              weightUnits={weightUnits}
-              distanceUnits={distanceUnits}
-              fetchSets={fetchSets}
-            />
-          )}
-
-          {activeTab === 'HISTORY' && (
-            <HistoryTab
-              allSets={allSets}
-              exercise={exercise}
-            />
-          )}
-
-          {activeTab === 'GRAPH' && (
-            <GraphTab
-              allSets={allSets}
-              exercise={exercise}
-            />
-          )}
-        </div>
+        {/* Exercise Tabs */}
+        <ExerciseTabs
+          currentSet={currentSet}
+          setCurrentSet={setCurrentSet}
+          saveSet={saveSet}
+          clearSet={clearSet}
+          saving={saving}
+          error={error}
+          sets={sets}
+          allSets={allSets}
+          editingSetId={editingSetId}
+          handleSetClick={handleSetClick}
+          handleCommentClick={handleCommentClick}
+          handleDeleteClick={handleDeleteClick}
+          exercise={exercise}
+          weightUnits={weightUnits}
+          distanceUnits={distanceUnits}
+          fetchSets={fetchSets}
+        />
 
         {/* Comment Modal */}
         <Modal isOpen={commentModalOpen} onClose={() => setCommentModalOpen(false)} maxWidth="sm">
@@ -409,18 +369,20 @@ function AddWorkoutContent() {
               placeholder="Add a note about this set..."
             />
             <div className="flex gap-3 mt-4">
-              <button
+              <Button
                 onClick={saveComment}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md"
+                variant="primary"
+                className="flex-1"
               >
                 Save
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setCommentModalOpen(false)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md"
+                variant="outline"
+                className="flex-1"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -433,18 +395,20 @@ function AddWorkoutContent() {
               Are you sure you want to delete this set? This action cannot be undone.
             </p>
             <div className="flex gap-3">
-              <button
+              <Button
                 onClick={deleteSet}
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md"
+                variant="danger"
+                className="flex-1"
               >
                 Delete
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => setDeleteModalOpen(false)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md"
+                variant="outline"
+                className="flex-1"
               >
                 Cancel
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>
@@ -455,19 +419,8 @@ function AddWorkoutContent() {
 
 export default function AddWorkoutPage() {
   return (
-    <ProtectedLayout>
-      <Suspense fallback={
-        <div className="min-h-screen bg-gray-50 py-12 px-4">
-          <div className="max-w-[600px] mx-auto">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading exercise...</p>
-            </div>
-          </div>
-        </div>
-      }>
-        <AddWorkoutContent />
-      </Suspense>
-    </ProtectedLayout>
+    <SuspenseFallback>
+      <AddWorkoutContent />
+    </SuspenseFallback>
   )
 }

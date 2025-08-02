@@ -3,6 +3,7 @@
 import { Exercise, WeightUnit, DistanceUnit, Workout } from '@/lib/types'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
+import Button from '../ui/Button'
 
 interface TrackTabProps {
   currentSet: {
@@ -87,13 +88,14 @@ export default function TrackTab({
               WEIGHT ({weightUnits.find(u => u.id === parseInt(currentSet.weight_unit))?.name || 'kg'}):
             </label>
             <div className="flex items-center gap-4">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setCurrentSet(prev => ({ ...prev, weight: Math.max(0, prev.weight - 2.5) }))}
-                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                className="w-12 h-12"
               >
                 −
-              </button>
+              </Button>
               <div className="flex-1">
                 <input
                   type="number"
@@ -104,13 +106,14 @@ export default function TrackTab({
                   className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
                 />
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setCurrentSet(prev => ({ ...prev, weight: prev.weight + 2.5 }))}
-                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                className="w-12 h-12"
               >
                 +
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -119,13 +122,14 @@ export default function TrackTab({
               REPS:
             </label>
             <div className="flex items-center gap-4">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setCurrentSet(prev => ({ ...prev, reps: Math.max(1, prev.reps - 1) }))}
-                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                className="w-12 h-12"
               >
                 −
-              </button>
+              </Button>
               <div className="flex-1">
                 <input
                   type="number"
@@ -135,13 +139,14 @@ export default function TrackTab({
                   className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
                 />
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setCurrentSet(prev => ({ ...prev, reps: prev.reps + 1 }))}
-                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                className="w-12 h-12"
               >
                 +
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -155,13 +160,14 @@ export default function TrackTab({
               DISTANCE ({distanceUnits.find(u => u.id === parseInt(currentSet.distance_unit))?.name || 'km'}):
             </label>
             <div className="flex items-center gap-4">
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setCurrentSet(prev => ({ ...prev, distance: Math.max(0, prev.distance - 0.1) }))}
-                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                className="w-12 h-12"
               >
                 −
-              </button>
+              </Button>
               <div className="flex-1">
                 <input
                   type="number"
@@ -172,13 +178,14 @@ export default function TrackTab({
                   className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
                 />
               </div>
-              <button
+              <Button
                 type="button"
+                variant="ghost"
                 onClick={() => setCurrentSet(prev => ({ ...prev, distance: prev.distance + 0.1 }))}
-                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                className="w-12 h-12"
               >
                 +
-              </button>
+              </Button>
             </div>
           </div>
 
@@ -217,8 +224,9 @@ export default function TrackTab({
 
       {/* Action Buttons */}
       <div className="flex gap-3 mt-6">
-        <button
+        <Button
           type="button"
+          variant={editingSetId ? 'primary' : 'secondary'}
           onClick={saveSet}
           disabled={saving}
           className={`flex-1 font-medium py-3 px-4 rounded-md disabled:opacity-50 text-white ${editingSetId
@@ -227,14 +235,15 @@ export default function TrackTab({
             }`}
         >
           {saving ? 'SAVING...' : editingSetId ? 'UPDATE' : 'SAVE'}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
+          variant="outline"
           onClick={clearSet}
-          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md"
+          className="flex-1"
         >
           CLEAR
-        </button>
+        </Button>
       </div>
 
       {/* Error */}
