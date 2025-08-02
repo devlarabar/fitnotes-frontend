@@ -25,18 +25,22 @@ function AddWorkoutContent() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sets, setSets] = useState<Workout[]>([])
-  
+
   // Edit mode state
   const [editingSetId, setEditingSetId] = useState<number | null>(null)
-  
+
   // Comment modal state
   const [commentModalOpen, setCommentModalOpen] = useState(false)
   const [commentingSetId, setCommentingSetId] = useState<number | null>(null)
   const [commentText, setCommentText] = useState('')
-  
+
   // Delete confirmation state
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [deletingSetId, setDeletingSetId] = useState<number | null>(null)
+
+  // Tab state
+  const [activeTab, setActiveTab] = useState<'TRACK' | 'HISTORY' | 'GRAPH'>('TRACK')
+  const [allSets, setAllSets] = useState<Workout[]>([])
 
   // Tracking state for current set
   const [currentSet, setCurrentSet] = useState({
@@ -71,6 +75,28 @@ function AddWorkoutContent() {
       console.error('Error fetching sets:', err)
     }
   }, [exerciseId, currentSet.date])
+
+  const fetchAllSets = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('workouts')
+        .select(`
+          *,
+          exercises(name),
+          categories(name),
+          weight_units(name),
+          distance_units(name)
+        `)
+        .eq('exercise', exerciseId)
+        .order('date', { ascending: false })
+        .order('id', { ascending: true })
+
+      if (error) throw error
+      setAllSets(data || [])
+    } catch (err) {
+      console.error('Error fetching all sets:', err)
+    }
+  }, [exerciseId])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -126,6 +152,8 @@ function AddWorkoutContent() {
 
         // Fetch existing sets for this exercise on this date
         await fetchSets()
+        // Also fetch all sets for history/graph tabs
+        await fetchAllSets()
       } catch (err) {
         console.error('Error fetching data:', err)
         setError(err instanceof Error ? err.message : 'Failed to fetch exercise data')
@@ -137,7 +165,7 @@ function AddWorkoutContent() {
     if (exerciseId) {
       fetchData()
     }
-  }, [exerciseId, fetchSets])
+  }, [exerciseId, fetchSets, fetchAllSets])
 
   const saveSet = async () => {
     setSaving(true)
@@ -157,7 +185,7 @@ function AddWorkoutContent() {
 
       // Add measurement-specific fields based on measurement type
       const measurementType = exercise?.measurement_type?.name
-      
+
       if (measurementType === 'reps') {
         workoutData.reps = currentSet.reps
         if (currentSet.weight > 0) {
@@ -198,7 +226,8 @@ function AddWorkoutContent() {
 
       // Refresh sets list
       await fetchSets()
-      
+      await fetchAllSets()
+
       // Reset edit mode and current set for next entry
       setEditingSetId(null)
       if (measurementType === 'reps') {
@@ -238,7 +267,7 @@ function AddWorkoutContent() {
 
     const measurementType = exercise?.measurement_type?.name
     setEditingSetId(set.id)
-    
+
     if (measurementType === 'reps') {
       setCurrentSet(prev => ({
         ...prev,
@@ -279,7 +308,7 @@ function AddWorkoutContent() {
 
   const saveComment = async () => {
     if (!commentingSetId) return
-    
+
     try {
       const { error } = await supabase
         .from('workouts')
@@ -287,8 +316,9 @@ function AddWorkoutContent() {
         .eq('id', commentingSetId)
 
       if (error) throw error
-      
+
       await fetchSets()
+      await fetchAllSets()
       setCommentModalOpen(false)
       setCommentingSetId(null)
       setCommentText('')
@@ -300,7 +330,7 @@ function AddWorkoutContent() {
 
   const deleteSet = async () => {
     if (!deletingSetId) return
-    
+
     try {
       const { error } = await supabase
         .from('workouts')
@@ -308,11 +338,12 @@ function AddWorkoutContent() {
         .eq('id', deletingSetId)
 
       if (error) throw error
-      
+
       await fetchSets()
+      await fetchAllSets()
       setDeleteModalOpen(false)
       setDeletingSetId(null)
-      
+
       // If we were editing this set, clear edit mode
       if (editingSetId === deletingSetId) {
         clearSet()
@@ -322,8 +353,6 @@ function AddWorkoutContent() {
       setError(err instanceof Error ? err.message : 'Failed to delete set')
     }
   }
-
-  const measurementType = exercise?.measurement_type?.name
 
   if (loading) {
     return (
@@ -362,11 +391,13 @@ function AddWorkoutContent() {
     )
   }
 
+  console.log('Rendering component, activeTab:', activeTab, 'exercise:', exercise?.name)
+  
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-[600px] mx-auto">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{exercise?.name}</h1>
@@ -376,241 +407,64 @@ function AddWorkoutContent() {
           </div>
         </div>
 
-        {/* Tracking Interface */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6">
-            {/* Date Selection */}
-            <div className="mb-6">
-              <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
-                Date
-              </label>
-              <input
-                type="date"
-                id="date"
-                value={currentSet.date}
-                onChange={(e) => {
-                  setCurrentSet(prev => ({ ...prev, date: e.target.value }))
-                  // Refresh sets when date changes
-                  setTimeout(() => fetchSets(), 100)
+        {/* Tab Navigation - Right at the top! */}
+        <div className="bg-white rounded-t-lg shadow-md border-2 border-gray-300 border-b-0 mb-0 relative z-10">
+          <div className="flex border-b border-gray-200">
+            {(['TRACK', 'HISTORY', 'GRAPH'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => {
+                  console.log('Tab clicked:', tab)
+                  setActiveTab(tab)
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            {/* Weight & Reps Tracking (for reps-based exercises) */}
-            {measurementType === 'reps' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    WEIGHT ({weightUnits.find(u => u.id === parseInt(currentSet.weight_unit))?.name || 'kg'}):
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setCurrentSet(prev => ({ ...prev, weight: Math.max(0, prev.weight - 2.5) }))}
-                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
-                    >
-                      −
-                    </button>
-                    <div className="flex-1 text-center">
-                      <span className="text-3xl font-bold">{currentSet.weight}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setCurrentSet(prev => ({ ...prev, weight: prev.weight + 2.5 }))}
-                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    REPS:
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setCurrentSet(prev => ({ ...prev, reps: Math.max(1, prev.reps - 1) }))}
-                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
-                    >
-                      −
-                    </button>
-                    <div className="flex-1 text-center">
-                      <span className="text-3xl font-bold">{currentSet.reps}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setCurrentSet(prev => ({ ...prev, reps: prev.reps + 1 }))}
-                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Distance & Time Tracking (for distance-based exercises) */}
-            {measurementType === 'distance' && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    DISTANCE ({distanceUnits.find(u => u.id === parseInt(currentSet.distance_unit))?.name || 'km'}):
-                  </label>
-                  <div className="flex items-center gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setCurrentSet(prev => ({ ...prev, distance: Math.max(0, prev.distance - 0.1) }))}
-                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
-                    >
-                      −
-                    </button>
-                    <div className="flex-1 text-center">
-                      <span className="text-3xl font-bold">{currentSet.distance.toFixed(1)}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setCurrentSet(prev => ({ ...prev, distance: prev.distance + 0.1 }))}
-                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    TIME (HH:MM:SS):
-                  </label>
-                  <input
-                    type="text"
-                    pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
-                    value={currentSet.time}
-                    onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
-                    placeholder="00:30:00"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Time Tracking (for time-based exercises) */}
-            {measurementType === 'time' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  TIME (HH:MM:SS):
-                </label>
-                <input
-                  type="text"
-                  pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
-                  value={currentSet.time}
-                  onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
-                  placeholder="00:30:00"
-                />
-              </div>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 mt-6">
-              <button
-                type="button"
-                onClick={saveSet}
-                disabled={saving}
-                className={`flex-1 font-medium py-3 px-4 rounded-md disabled:opacity-50 text-white ${
-                  editingSetId 
-                    ? 'bg-green-500 hover:bg-green-600' 
-                    : 'bg-emerald-500 hover:bg-emerald-600'
-                }`}
+                className={`flex-1 py-4 px-6 text-sm font-bold transition-colors relative ${activeTab === tab
+                    ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
               >
-                {saving ? 'SAVING...' : editingSetId ? 'UPDATE' : 'SAVE'}
+                {tab}
+                {activeTab === tab && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
+                )}
               </button>
-              <button
-                type="button"
-                onClick={clearSet}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md"
-              >
-                CLEAR
-              </button>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-3">
-                <p className="text-sm text-red-700">{error}</p>
-              </div>
-            )}
+            ))}
           </div>
+        </div>
 
-          {/* Sets History */}
-          {sets.length > 0 && (
-            <div className="border-t border-gray-200">
-              <div className="p-4 bg-gray-50">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Today&apos;s Sets</h3>
-                <div className="space-y-2">
-                  {sets.map((set, index) => (
-                    <div 
-                      key={set.id} 
-                      className={`flex items-center justify-between bg-white p-3 rounded border cursor-pointer hover:bg-gray-50 transition-colors ${
-                        editingSetId === set.id ? 'ring-2 ring-green-400 bg-green-50' : ''
-                      }`}
-                      onClick={() => handleSetClick(set)}
-                    >
-                      <div className="flex items-center gap-3 flex-1">
-                        <span className={`flex items-center justify-center w-6 h-6 text-sm font-medium rounded-full ${
-                          editingSetId === set.id ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {index + 1}
-                        </span>
-                        <div className="text-sm">
-                          {measurementType === 'reps' && (
-                            <span>
-                              {set.weight ? `${set.weight} ${set.weight_units?.name || ''} × ` : ''}
-                              {set.reps} reps
-                            </span>
-                          )}
-                          {measurementType === 'distance' && (
-                            <span>
-                              {set.distance} {set.distance_units?.name || ''}
-                              {set.time && ` in ${set.time}`}
-                            </span>
-                          )}
-                          {measurementType === 'time' && (
-                            <span>{set.time}</span>
-                          )}
-                        </div>
-                        {set.comment && (
-                          <div className="text-xs text-gray-500 italic truncate max-w-32">
-                            &ldquo;{set.comment}&rdquo;
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={(e) => handleCommentClick(e, set)}
-                          className="text-gray-400 hover:text-blue-600 transition-colors"
-                          title="Add/edit comment"
-                        >
-                          <FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDeleteClick(e, set)}
-                          className="text-gray-400 hover:text-red-600 transition-colors"
-                          title="Delete set"
-                        >
-                          <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
-                        </button>
-                        <div className="text-xs text-gray-500 min-w-16 text-right">
-                          {new Date(`${set.date}T12:00:00`).toLocaleDateString()}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+        {/* Tab Content */}
+        <div className="bg-white rounded-b-lg shadow-md border-2 border-gray-300 border-t-0 overflow-hidden relative z-10">
+          {activeTab === 'TRACK' && (
+            <TrackTab
+              currentSet={currentSet}
+              setCurrentSet={setCurrentSet}
+              saveSet={saveSet}
+              clearSet={clearSet}
+              saving={saving}
+              error={error}
+              sets={sets}
+              editingSetId={editingSetId}
+              handleSetClick={handleSetClick}
+              handleCommentClick={handleCommentClick}
+              handleDeleteClick={handleDeleteClick}
+              exercise={exercise}
+              weightUnits={weightUnits}
+              distanceUnits={distanceUnits}
+              fetchSets={fetchSets}
+            />
+          )}
+
+          {activeTab === 'HISTORY' && (
+            <HistoryTab
+              allSets={allSets}
+              exercise={exercise}
+            />
+          )}
+
+          {activeTab === 'GRAPH' && (
+            <GraphTab
+              allSets={allSets}
+              exercise={exercise}
+            />
           )}
         </div>
 
@@ -666,6 +520,467 @@ function AddWorkoutContent() {
           </div>
         </Modal>
       </div>
+    </div>
+  )
+}
+
+// TrackTab Component
+interface TrackTabProps {
+  currentSet: {
+    date: string
+    weight: number
+    weight_unit: string
+    reps: number
+    distance: number
+    distance_unit: string
+    time: string
+    comment: string
+  }
+  setCurrentSet: React.Dispatch<React.SetStateAction<{
+    date: string
+    weight: number
+    weight_unit: string
+    reps: number
+    distance: number
+    distance_unit: string
+    time: string
+    comment: string
+  }>>
+  saveSet: () => void
+  clearSet: () => void
+  saving: boolean
+  error: string | null
+  sets: Workout[]
+  editingSetId: number | null
+  handleSetClick: (set: Workout) => void
+  handleCommentClick: (e: React.MouseEvent, set: Workout) => void
+  handleDeleteClick: (e: React.MouseEvent, set: Workout) => void
+  exercise: Exercise | null
+  weightUnits: WeightUnit[]
+  distanceUnits: DistanceUnit[]
+  fetchSets: () => void
+}
+
+function TrackTab({
+  currentSet,
+  setCurrentSet,
+  saveSet,
+  clearSet,
+  saving,
+  error,
+  sets,
+  editingSetId,
+  handleSetClick,
+  handleCommentClick,
+  handleDeleteClick,
+  exercise,
+  weightUnits,
+  distanceUnits,
+  fetchSets
+}: TrackTabProps) {
+  const measurementType = exercise?.measurement_type?.name
+
+  return (
+    <div className="p-6">
+      {/* Date Selection */}
+      <div className="mb-6">
+        <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
+          Date
+        </label>
+        <input
+          type="date"
+          id="date"
+          value={currentSet.date}
+          onChange={(e) => {
+            setCurrentSet(prev => ({ ...prev, date: e.target.value }))
+            // Refresh sets when date changes
+            setTimeout(() => fetchSets(), 100)
+          }}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      {/* Weight & Reps Tracking (for reps-based exercises) */}
+      {measurementType === 'reps' && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              WEIGHT ({weightUnits.find(u => u.id === parseInt(currentSet.weight_unit))?.name || 'kg'}):
+            </label>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setCurrentSet(prev => ({ ...prev, weight: Math.max(0, prev.weight - 2.5) }))}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+              >
+                −
+              </button>
+              <div className="flex-1 text-center">
+                <span className="text-3xl font-bold">{currentSet.weight}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentSet(prev => ({ ...prev, weight: prev.weight + 2.5 }))}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              REPS:
+            </label>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setCurrentSet(prev => ({ ...prev, reps: Math.max(1, prev.reps - 1) }))}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+              >
+                −
+              </button>
+              <div className="flex-1 text-center">
+                <span className="text-3xl font-bold">{currentSet.reps}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentSet(prev => ({ ...prev, reps: prev.reps + 1 }))}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Distance & Time Tracking (for distance-based exercises) */}
+      {measurementType === 'distance' && (
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              DISTANCE ({distanceUnits.find(u => u.id === parseInt(currentSet.distance_unit))?.name || 'km'}):
+            </label>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setCurrentSet(prev => ({ ...prev, distance: Math.max(0, prev.distance - 0.1) }))}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+              >
+                −
+              </button>
+              <div className="flex-1 text-center">
+                <span className="text-3xl font-bold">{currentSet.distance.toFixed(1)}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCurrentSet(prev => ({ ...prev, distance: prev.distance + 0.1 }))}
+                className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+              >
+                +
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              TIME (HH:MM:SS):
+            </label>
+            <input
+              type="text"
+              pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
+              value={currentSet.time}
+              onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
+              placeholder="00:30:00"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Time Tracking (for time-based exercises) */}
+      {measurementType === 'time' && (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            TIME (HH:MM:SS):
+          </label>
+          <input
+            type="text"
+            pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
+            value={currentSet.time}
+            onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
+            placeholder="00:30:00"
+          />
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="flex gap-3 mt-6">
+        <button
+          type="button"
+          onClick={saveSet}
+          disabled={saving}
+          className={`flex-1 font-medium py-3 px-4 rounded-md disabled:opacity-50 text-white ${editingSetId
+              ? 'bg-green-500 hover:bg-green-600'
+              : 'bg-emerald-500 hover:bg-emerald-600'
+            }`}
+        >
+          {saving ? 'SAVING...' : editingSetId ? 'UPDATE' : 'SAVE'}
+        </button>
+        <button
+          type="button"
+          onClick={clearSet}
+          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md"
+        >
+          CLEAR
+        </button>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-3">
+          <p className="text-sm text-red-700">{error}</p>
+        </div>
+      )}
+
+      {/* Sets History */}
+      {sets.length > 0 && (
+        <div className="mt-6 border-t border-gray-200 pt-6">
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Today&apos;s Sets</h3>
+          <div className="space-y-2">
+            {sets.map((set, index) => (
+              <div
+                key={set.id}
+                className={`flex items-center justify-between bg-gray-50 p-3 rounded border cursor-pointer hover:bg-gray-100 transition-colors ${editingSetId === set.id ? 'ring-2 ring-green-400 bg-green-50' : ''
+                  }`}
+                onClick={() => handleSetClick(set)}
+              >
+                <div className="flex items-center gap-3 flex-1">
+                  <span className={`flex items-center justify-center w-6 h-6 text-sm font-medium rounded-full ${editingSetId === set.id ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                    }`}>
+                    {index + 1}
+                  </span>
+                  <div className="text-sm">
+                    {measurementType === 'reps' && (
+                      <span>
+                        {set.weight ? `${set.weight} ${set.weight_units?.name || ''} × ` : ''}
+                        {set.reps} reps
+                      </span>
+                    )}
+                    {measurementType === 'distance' && (
+                      <span>
+                        {set.distance} {set.distance_units?.name || ''}
+                        {set.time && ` in ${set.time}`}
+                      </span>
+                    )}
+                    {measurementType === 'time' && (
+                      <span>{set.time}</span>
+                    )}
+                  </div>
+                  {set.comment && (
+                    <div className="text-xs text-gray-500 italic truncate max-w-32">
+                      &ldquo;{set.comment}&rdquo;
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={(e) => handleCommentClick(e, set)}
+                    className="text-gray-400 hover:text-blue-600 transition-colors"
+                    title="Add/edit comment"
+                  >
+                    <FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => handleDeleteClick(e, set)}
+                    className="text-gray-400 hover:text-red-600 transition-colors"
+                    title="Delete set"
+                  >
+                    <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+                  </button>
+                  <div className="text-xs text-gray-500 min-w-16 text-right">
+                    {new Date(`${set.date}T12:00:00`).toLocaleDateString()}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// HistoryTab Component
+interface HistoryTabProps {
+  allSets: Workout[]
+  exercise: Exercise | null
+}
+
+function HistoryTab({ allSets, exercise }: HistoryTabProps) {
+  const measurementType = exercise?.measurement_type?.name
+
+  // Group sets by date
+  const setsByDate = allSets.reduce((acc: Record<string, Workout[]>, set) => {
+    if (!acc[set.date]) {
+      acc[set.date] = []
+    }
+    acc[set.date].push(set)
+    return acc
+  }, {})
+
+  const dates = Object.keys(setsByDate).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+
+  return (
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Exercise History</h3>
+
+      {dates.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 text-4xl mb-4">📊</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No history yet</h3>
+          <p className="text-gray-500">
+            Start tracking this exercise to see your progress over time.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {dates.map((date) => (
+            <div key={date} className="bg-gray-50 rounded-lg p-4">
+              <div className="flex justify-between items-center mb-3">
+                <h4 className="font-medium text-gray-900">
+                  {new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </h4>
+                <span className="text-sm text-gray-500">
+                  {setsByDate[date].length} set{setsByDate[date].length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {setsByDate[date].map((set, index) => (
+                  <div key={set.id} className="flex items-center gap-3 text-sm">
+                    <span className="flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
+                      {index + 1}
+                    </span>
+                    <div>
+                      {measurementType === 'reps' && (
+                        <span>
+                          {set.weight ? `${set.weight} ${set.weight_units?.name || ''} × ` : ''}
+                          {set.reps} reps
+                        </span>
+                      )}
+                      {measurementType === 'distance' && (
+                        <span>
+                          {set.distance} {set.distance_units?.name || ''}
+                          {set.time && ` in ${set.time}`}
+                        </span>
+                      )}
+                      {measurementType === 'time' && (
+                        <span>{set.time}</span>
+                      )}
+                    </div>
+                    {set.comment && (
+                      <div className="text-xs text-gray-500 italic">
+                        &ldquo;{set.comment}&rdquo;
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// GraphTab Component
+interface GraphTabProps {
+  allSets: Workout[]
+  exercise: Exercise | null
+}
+
+function GraphTab({ allSets, exercise }: GraphTabProps) {
+  const measurementType = exercise?.measurement_type?.name
+
+  // Calculate stats
+  const totalSets = allSets.length
+  const uniqueDates = new Set(allSets.map(set => set.date)).size
+
+  let maxWeight = 0
+  let maxReps = 0
+  let maxDistance = 0
+
+  if (measurementType === 'reps') {
+    maxWeight = Math.max(...allSets.map(set => set.weight || 0))
+    maxReps = Math.max(...allSets.map(set => set.reps || 0))
+  } else if (measurementType === 'distance') {
+    maxDistance = Math.max(...allSets.map(set => set.distance || 0))
+  }
+
+  return (
+    <div className="p-6">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Progress Overview</h3>
+
+      {allSets.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 text-4xl mb-4">📈</div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No data yet</h3>
+          <p className="text-gray-500">
+            Complete some workouts to see your progress charts.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <div className="text-2xl font-bold text-blue-600">{totalSets}</div>
+              <div className="text-sm text-blue-800">Total Sets</div>
+            </div>
+            <div className="bg-green-50 rounded-lg p-4">
+              <div className="text-2xl font-bold text-green-600">{uniqueDates}</div>
+              <div className="text-sm text-green-800">Workout Days</div>
+            </div>
+          </div>
+
+          {/* Personal Records */}
+          {measurementType === 'reps' && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-purple-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-purple-600">{maxWeight}</div>
+                <div className="text-sm text-purple-800">Max Weight</div>
+              </div>
+              <div className="bg-orange-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-orange-600">{maxReps}</div>
+                <div className="text-sm text-orange-800">Max Reps</div>
+              </div>
+            </div>
+          )}
+
+          {measurementType === 'distance' && (
+            <div className="bg-cyan-50 rounded-lg p-4">
+              <div className="text-2xl font-bold text-cyan-600">{maxDistance}</div>
+              <div className="text-sm text-cyan-800">Max Distance</div>
+            </div>
+          )}
+
+          {/* Placeholder for future charts */}
+          <div className="bg-gray-50 rounded-lg p-8 text-center">
+            <div className="text-gray-400 text-3xl mb-2">📊</div>
+            <p className="text-sm text-gray-500">
+              Progress charts coming soon!
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
