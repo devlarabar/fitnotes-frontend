@@ -261,13 +261,20 @@ export default function TrackTab({
             {sets.map((set, index) => (
               <div
                 key={set.id}
-                className={`flex items-center justify-between bg-gray-50 p-3 rounded border cursor-pointer hover:bg-gray-100 transition-colors ${editingSetId === set.id ? 'ring-2 ring-green-400 bg-green-50' : ''
-                  }`}
+                className={`
+                  flex items-center justify-between bg-gray-50 p-3 rounded 
+                  cursor-pointer hover:bg-gray-100 transition-colors 
+                  ${editingSetId === set.id ? 'ring-2 ring-green-400 bg-green-50' : ''
+                  }
+                `}
                 onClick={() => handleSetClick(set)}
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <span className={`flex items-center justify-center w-6 h-6 text-sm font-medium rounded-full ${editingSetId === set.id ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
+                  <span className={`
+                    flex items-center justify-center w-6 h-6 text-sm 
+                    font-medium rounded-full 
+                    ${editingSetId === set.id ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}
+                  `}>
                     {index + 1}
                   </span>
                   <div className="text-sm">
@@ -299,14 +306,14 @@ export default function TrackTab({
                     className="text-gray-400 hover:text-blue-600 transition-colors"
                     title="Add/edit comment"
                   >
-                    <FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faEdit} className="w-4 h-4 hover:cursor-pointer" />
                   </button>
                   <button
                     onClick={(e) => handleDeleteClick(e, set)}
                     className="text-gray-400 hover:text-red-600 transition-colors"
                     title="Delete set"
                   >
-                    <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faTrash} className="w-4 h-4 hover:cursor-pointer" />
                   </button>
                   <div className="text-xs text-gray-500 min-w-16 text-right">
                     {new Date(`${set.date}T12:00:00`).toLocaleDateString()}

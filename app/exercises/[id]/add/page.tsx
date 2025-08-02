@@ -192,17 +192,7 @@ function AddWorkoutContent() {
       // Refresh both sets and allSets
       await Promise.all([fetchSets(), fetchAllSets()])
 
-      // Clear the form if it was a new set
-      if (!editingSetId) {
-        setCurrentSet(prev => ({
-          ...prev,
-          weight: 0,
-          reps: 1,
-          distance: 0,
-          time: '',
-          comment: ''
-        }))
-      }
+      // Keep the form values as-is after saving
 
       // Clear edit mode
       setEditingSetId(null)
@@ -216,14 +206,7 @@ function AddWorkoutContent() {
   }
 
   const clearSet = () => {
-    setCurrentSet(prev => ({
-      ...prev,
-      weight: 0,
-      reps: 1,
-      distance: 0,
-      time: '',
-      comment: ''
-    }))
+    // Only clear editing state, keep input values
     setEditingSetId(null)
     setError(null)
   }
