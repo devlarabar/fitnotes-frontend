@@ -2,14 +2,14 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { Category } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
+import SuspenseFallback from '@/components/misc/SuspenseFallback'
 
 function CategoriesContent() {
   const searchParams = useSearchParams()
@@ -157,19 +157,8 @@ function getCategoryEmoji(categoryName: string): string {
 
 export default function CategoriesPage() {
   return (
-    <ProtectedLayout>
-      <Suspense fallback={
-        <div className="min-h-screen bg-gray-50 py-12 px-4">
-          <div className="max-w-[1300px] mx-auto">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading categories...</p>
-            </div>
-          </div>
-        </div>
-      }>
-        <CategoriesContent />
-      </Suspense>
-    </ProtectedLayout>
+    <SuspenseFallback>
+      <CategoriesContent />
+    </SuspenseFallback>
   )
 }

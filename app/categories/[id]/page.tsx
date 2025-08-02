@@ -2,14 +2,14 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import ProtectedLayout from '@/components/ProtectedLayout'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { Exercise, Category } from '@/lib/types'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import BackButton from '@/components/ui/BackButton'
+import SuspenseFallback from '@/components/misc/SuspenseFallback'
 
 function ExercisesContent() {
   const params = useParams()
@@ -170,19 +170,8 @@ function ExercisesContent() {
 
 export default function ExercisesPage() {
   return (
-    <ProtectedLayout>
-      <Suspense fallback={
-        <div className="min-h-screen bg-gray-50 py-12 px-4">
-          <div className="max-w-[1300px] mx-auto">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading exercises...</p>
-            </div>
-          </div>
-        </div>
-      }>
-        <ExercisesContent />
-      </Suspense>
-    </ProtectedLayout>
+    <SuspenseFallback>
+      <ExercisesContent />
+    </SuspenseFallback>
   )
 }
