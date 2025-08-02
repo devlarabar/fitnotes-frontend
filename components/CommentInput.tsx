@@ -45,17 +45,25 @@ export default function CommentInput({ date }: CommentInputProps) {
       .from('comments')
       .select('comment')
       .eq('date', date);
-    if (commentData) {
-      // If a comment already exists, update it
-      await supabase
-        .from('comments')
-        .update({ comment })
-        .eq('date', date)
-    } else {
+    if (commentData && commentData.length > 0) {
+      if (!comment.trim()) {
+        // Delete the comment if the input was empty
+        await supabase
+          .from('comments')
+          .delete()
+          .eq('date', date);
+      } else {
+        // If a comment already exists, update it
+        await supabase
+          .from('comments')
+          .update({ comment })
+          .eq('date', date);
+      }
+    } else if (comment.trim()) {
       // If no comment exists, create a new one
       await supabase
         .from('comments')
-        .insert({ date, comment })
+        .insert({ date, comment });
     }
     if (commentError) {
       setCommentError(commentError.message)
@@ -82,7 +90,7 @@ export default function CommentInput({ date }: CommentInputProps) {
         />
         {commentError && <p className="text-red-500 text-sm">{commentError}</p>}
         <div className="flex justify-end pt-1">
-          <Button type="submit" size="sm" disabled={submitting || !comment.trim() || loading}>
+          <Button type="submit" size="sm" disabled={submitting || loading}>
             {submitting ? 'Saving...' : loading ? 'Loading...' : 'Save Comment'}
           </Button>
         </div>
