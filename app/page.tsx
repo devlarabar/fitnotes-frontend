@@ -5,6 +5,7 @@ import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import CustomLink from '@/components/typography/CustomLink';
 
 export default function Home() {
+  const today = new Date().toISOString().split('T')[0]
   return (
     <ProtectedLayout>
       <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -28,7 +29,7 @@ export default function Home() {
           <div className="mb-12 text-center">
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
-                href="/today"
+                href={`/day/${today}`}
                 variant="primary"
                 size="lg"
               >

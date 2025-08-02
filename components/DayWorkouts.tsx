@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
-import EditWorkoutModal from '@/components/EditWorkoutModal'
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { Workout } from '@/lib/types'
 import BackButton from './ui/BackButton'
@@ -25,17 +26,17 @@ interface DayWorkoutsProps {
 }
 
 export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
+  const router = useRouter()
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [groupedWorkouts, setGroupedWorkouts] = useState<GroupedWorkout[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editWorkout, setEditWorkout] = useState<Workout | null>(null)
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
+
 
   useEffect(() => {
     fetchWorkouts()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date])
 
   const groupWorkoutsByExercise = (workouts: Workout[]): GroupedWorkout[] => {
@@ -85,18 +86,11 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
   }
 
   const handleEditWorkout = (workout: Workout) => {
-    setEditWorkout(workout)
-    setIsEditModalOpen(true)
+    // Navigate to the tracking page for this exercise with the current date
+    router.push(`/exercises/${workout.exercise}/add?date=${date}`)
   }
 
-  const handleEditModalClose = () => {
-    setIsEditModalOpen(false)
-    setEditWorkout(null)
-  }
 
-  const handleEditSuccess = () => {
-    fetchWorkouts()
-  }
 
   const fetchWorkouts = async () => {
     try {
@@ -111,20 +105,20 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
       setWorkouts(data || [])
       const grouped = groupWorkoutsByExercise(data || [])
       setGroupedWorkouts(grouped)
-    } catch (err) { 
-      setError(err instanceof Error ? err.message : 'Failed to fetch workouts') 
-    } finally { 
-      setLoading(false) 
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch workouts')
+    } finally {
+      setLoading(false)
     }
   }
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr + 'T00:00:00')
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     })
   }
 
@@ -250,8 +244,8 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
                   {/* Sets */}
                   <div className="divide-y divide-gray-100">
                     {group.sets.map((workout, index) => (
-                      <div 
-                        key={workout.id} 
+                      <div
+                        key={workout.id}
                         className="px-6 py-4 hover:bg-purple-50 cursor-pointer transition-colors"
                         onClick={() => handleEditWorkout(workout)}
                       >
@@ -314,14 +308,6 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
             </Button>
           </div>
         )}
-
-        {/* Edit Workout Modal */}
-        <EditWorkoutModal
-          workout={editWorkout}
-          isOpen={isEditModalOpen}
-          onClose={handleEditModalClose}
-          onSuccess={handleEditSuccess}
-        />
       </div>
     </div>
   )

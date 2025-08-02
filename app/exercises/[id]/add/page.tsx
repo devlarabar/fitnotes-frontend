@@ -391,8 +391,6 @@ function AddWorkoutContent() {
     )
   }
 
-  console.log('Rendering component, activeTab:', activeTab, 'exercise:', exercise?.name)
-  
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-[600px] mx-auto">
@@ -413,10 +411,7 @@ function AddWorkoutContent() {
             {(['TRACK', 'HISTORY', 'GRAPH'] as const).map((tab) => (
               <button
                 key={tab}
-                onClick={() => {
-                  console.log('Tab clicked:', tab)
-                  setActiveTab(tab)
-                }}
+                onClick={() => setActiveTab(tab)}
                 className={`flex-1 py-4 px-6 text-sm font-bold transition-colors relative ${activeTab === tab
                     ? 'bg-blue-100 text-blue-700 border-b-2 border-blue-600'
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
@@ -615,8 +610,15 @@ function TrackTab({
               >
                 −
               </button>
-              <div className="flex-1 text-center">
-                <span className="text-3xl font-bold">{currentSet.weight}</span>
+              <div className="flex-1">
+                <input
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={currentSet.weight}
+                  onChange={(e) => setCurrentSet(prev => ({ ...prev, weight: parseFloat(e.target.value) || 0 }))}
+                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
+                />
               </div>
               <button
                 type="button"
@@ -640,8 +642,14 @@ function TrackTab({
               >
                 −
               </button>
-              <div className="flex-1 text-center">
-                <span className="text-3xl font-bold">{currentSet.reps}</span>
+              <div className="flex-1">
+                <input
+                  type="number"
+                  min="1"
+                  value={currentSet.reps}
+                  onChange={(e) => setCurrentSet(prev => ({ ...prev, reps: parseInt(e.target.value) || 1 }))}
+                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
+                />
               </div>
               <button
                 type="button"
@@ -670,8 +678,15 @@ function TrackTab({
               >
                 −
               </button>
-              <div className="flex-1 text-center">
-                <span className="text-3xl font-bold">{currentSet.distance.toFixed(1)}</span>
+              <div className="flex-1">
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={currentSet.distance}
+                  onChange={(e) => setCurrentSet(prev => ({ ...prev, distance: parseFloat(e.target.value) || 0 }))}
+                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
+                />
               </div>
               <button
                 type="button"
