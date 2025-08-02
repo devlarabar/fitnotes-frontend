@@ -2,18 +2,18 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Button from '@/components/ui/Button'
-import { useParams, useRouter, useSearchParams } from 'next/navigation'
-import { Exercise, WeightUnit, DistanceUnit, WorkoutData } from '@/lib/types'
-import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
+import { useParams, useSearchParams } from 'next/navigation'
+import { Exercise, WeightUnit, DistanceUnit, WorkoutData, Workout } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
+import Modal from '@/components/ui/Modal'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
 
 function AddWorkoutContent() {
   const params = useParams()
-  const router = useRouter()
   const searchParams = useSearchParams()
   const exerciseId = params.id as string
   const dateParam = searchParams.get('date')
@@ -22,20 +22,55 @@ function AddWorkoutContent() {
   const [weightUnits, setWeightUnits] = useState<WeightUnit[]>([])
   const [distanceUnits, setDistanceUnits] = useState<DistanceUnit[]>([])
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [sets, setSets] = useState<Workout[]>([])
+  
+  // Edit mode state
+  const [editingSetId, setEditingSetId] = useState<number | null>(null)
+  
+  // Comment modal state
+  const [commentModalOpen, setCommentModalOpen] = useState(false)
+  const [commentingSetId, setCommentingSetId] = useState<number | null>(null)
+  const [commentText, setCommentText] = useState('')
+  
+  // Delete confirmation state
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deletingSetId, setDeletingSetId] = useState<number | null>(null)
 
-  // Form state
-  const [formData, setFormData] = useState({
-    date: dateParam || new Date().toISOString().split('T')[0], // Use date parameter or today's date
-    weight: '',
+  // Tracking state for current set
+  const [currentSet, setCurrentSet] = useState({
+    date: dateParam || new Date().toISOString().split('T')[0],
+    weight: 0,
     weight_unit: '',
-    reps: '',
-    distance: '',
+    reps: 1,
+    distance: 0,
     distance_unit: '',
     time: '',
     comment: ''
   })
+
+  const fetchSets = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('workouts')
+        .select(`
+          *,
+          exercises(name),
+          categories(name),
+          weight_units(name),
+          distance_units(name)
+        `)
+        .eq('exercise', exerciseId)
+        .eq('date', currentSet.date)
+        .order('id', { ascending: true })
+
+      if (error) throw error
+      setSets(data || [])
+    } catch (err) {
+      console.error('Error fetching sets:', err)
+    }
+  }, [exerciseId, currentSet.date])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,11 +118,14 @@ function AddWorkoutContent() {
 
         // Set default units
         if (weightData?.length > 0) {
-          setFormData(prev => ({ ...prev, weight_unit: weightData[0].id.toString() }))
+          setCurrentSet(prev => ({ ...prev, weight_unit: weightData[0].id.toString() }))
         }
         if (distanceData?.length > 0) {
-          setFormData(prev => ({ ...prev, distance_unit: distanceData[0].id.toString() }))
+          setCurrentSet(prev => ({ ...prev, distance_unit: distanceData[0].id.toString() }))
         }
+
+        // Fetch existing sets for this exercise on this date
+        await fetchSets()
       } catch (err) {
         console.error('Error fetching data:', err)
         setError(err instanceof Error ? err.message : 'Failed to fetch exercise data')
@@ -99,11 +137,10 @@ function AddWorkoutContent() {
     if (exerciseId) {
       fetchData()
     }
-  }, [exerciseId])
+  }, [exerciseId, fetchSets])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSubmitting(true)
+  const saveSet = async () => {
+    setSaving(true)
     setError(null)
 
     try {
@@ -112,46 +149,177 @@ function AddWorkoutContent() {
       }
 
       const workoutData: WorkoutData = {
-        date: formData.date,
+        date: currentSet.date,
         exercise: parseInt(exerciseId),
         category: exercise?.category || 0,
-        comment: formData.comment || ''
+        comment: currentSet.comment || ''
       }
 
-      // Add measurement-specific fields
-      if (formData.weight) {
-        workoutData.weight = parseFloat(formData.weight)
-        workoutData.weight_unit = parseInt(formData.weight_unit)
+      // Add measurement-specific fields based on measurement type
+      const measurementType = exercise?.measurement_type?.name
+      
+      if (measurementType === 'reps') {
+        workoutData.reps = currentSet.reps
+        if (currentSet.weight > 0) {
+          workoutData.weight = currentSet.weight
+          workoutData.weight_unit = parseInt(currentSet.weight_unit)
+        }
       }
 
-      if (formData.reps) {
-        workoutData.reps = parseInt(formData.reps)
+      if (measurementType === 'distance') {
+        workoutData.distance = currentSet.distance
+        workoutData.distance_unit = parseInt(currentSet.distance_unit)
+        if (currentSet.time) {
+          workoutData.time = currentSet.time
+        }
       }
 
-      if (formData.distance) {
-        workoutData.distance = parseFloat(formData.distance)
-        workoutData.distance_unit = parseInt(formData.distance_unit)
+      if (measurementType === 'time') {
+        workoutData.time = currentSet.time
       }
 
-      if (formData.time) {
-        workoutData.time = formData.time
+      let error
+      if (editingSetId) {
+        // Update existing set
+        const result = await supabase
+          .from('workouts')
+          .update(workoutData)
+          .eq('id', editingSetId)
+        error = result.error
+      } else {
+        // Insert new set
+        const result = await supabase
+          .from('workouts')
+          .insert(workoutData)
+        error = result.error
       }
 
+      if (error) throw error
+
+      // Refresh sets list
+      await fetchSets()
+      
+      // Reset edit mode and current set for next entry
+      setEditingSetId(null)
+      if (measurementType === 'reps') {
+        setCurrentSet(prev => ({ ...prev, reps: 1, comment: '' }))
+      } else if (measurementType === 'distance') {
+        setCurrentSet(prev => ({ ...prev, distance: 0, time: '', comment: '' }))
+      } else if (measurementType === 'time') {
+        setCurrentSet(prev => ({ ...prev, time: '', comment: '' }))
+      }
+
+    } catch (err) {
+      console.error('Error saving set:', err)
+      setError(err instanceof Error ? err.message : 'Failed to save set')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const clearSet = () => {
+    const measurementType = exercise?.measurement_type?.name
+    setEditingSetId(null)
+    if (measurementType === 'reps') {
+      setCurrentSet(prev => ({ ...prev, weight: 0, reps: 1, comment: '' }))
+    } else if (measurementType === 'distance') {
+      setCurrentSet(prev => ({ ...prev, distance: 0, time: '', comment: '' }))
+    } else if (measurementType === 'time') {
+      setCurrentSet(prev => ({ ...prev, time: '', comment: '' }))
+    }
+  }
+
+  const handleSetClick = (set: Workout) => {
+    // If clicking on the same set that's already being edited, deselect it
+    if (editingSetId === set.id) {
+      clearSet()
+      return
+    }
+
+    const measurementType = exercise?.measurement_type?.name
+    setEditingSetId(set.id)
+    
+    if (measurementType === 'reps') {
+      setCurrentSet(prev => ({
+        ...prev,
+        weight: set.weight || 0,
+        weight_unit: set.weight_unit?.toString() || prev.weight_unit,
+        reps: set.reps || 1,
+        comment: set.comment || ''
+      }))
+    } else if (measurementType === 'distance') {
+      setCurrentSet(prev => ({
+        ...prev,
+        distance: set.distance || 0,
+        distance_unit: set.distance_unit?.toString() || prev.distance_unit,
+        time: set.time || '',
+        comment: set.comment || ''
+      }))
+    } else if (measurementType === 'time') {
+      setCurrentSet(prev => ({
+        ...prev,
+        time: set.time || '',
+        comment: set.comment || ''
+      }))
+    }
+  }
+
+  const handleCommentClick = (e: React.MouseEvent, set: Workout) => {
+    e.stopPropagation()
+    setCommentingSetId(set.id)
+    setCommentText(set.comment || '')
+    setCommentModalOpen(true)
+  }
+
+  const handleDeleteClick = (e: React.MouseEvent, set: Workout) => {
+    e.stopPropagation()
+    setDeletingSetId(set.id)
+    setDeleteModalOpen(true)
+  }
+
+  const saveComment = async () => {
+    if (!commentingSetId) return
+    
+    try {
       const { error } = await supabase
         .from('workouts')
-        .insert(workoutData)
+        .update({ comment: commentText })
+        .eq('id', commentingSetId)
 
-      if (error) {
-        throw error
-      }
-
-      // Success! Redirect to the day's workouts page
-      router.push(`/day/${workoutData.date}`)
+      if (error) throw error
+      
+      await fetchSets()
+      setCommentModalOpen(false)
+      setCommentingSetId(null)
+      setCommentText('')
     } catch (err) {
-      console.error('Error saving workout:', err)
-      setError(err instanceof Error ? err.message : 'Failed to save workout')
-    } finally {
-      setSubmitting(false)
+      console.error('Error saving comment:', err)
+      setError(err instanceof Error ? err.message : 'Failed to save comment')
+    }
+  }
+
+  const deleteSet = async () => {
+    if (!deletingSetId) return
+    
+    try {
+      const { error } = await supabase
+        .from('workouts')
+        .delete()
+        .eq('id', deletingSetId)
+
+      if (error) throw error
+      
+      await fetchSets()
+      setDeleteModalOpen(false)
+      setDeletingSetId(null)
+      
+      // If we were editing this set, clear edit mode
+      if (editingSetId === deletingSetId) {
+        clearSet()
+      }
+    } catch (err) {
+      console.error('Error deleting set:', err)
+      setError(err instanceof Error ? err.message : 'Failed to delete set')
     }
   }
 
@@ -160,7 +328,7 @@ function AddWorkoutContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[800px] mx-auto">
+        <div className="max-w-[600px] mx-auto">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading exercise...</p>
@@ -173,7 +341,7 @@ function AddWorkoutContent() {
   if (error && !exercise) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[800px] mx-auto">
+        <div className="max-w-[600px] mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
               <div className="flex-shrink-0">
@@ -195,204 +363,308 @@ function AddWorkoutContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-[800px] mx-auto">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-[600px] mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Add Workout</h1>
-              <p className="mt-2 text-gray-600">
-                {exercise?.name} • {exercise?.categories?.name}
-              </p>
+              <h1 className="text-2xl font-bold text-gray-900">{exercise?.name}</h1>
+              <p className="mt-1 text-gray-600">{exercise?.categories?.name}</p>
             </div>
-            <BackButton>← Back to Exercises</BackButton>
+            <BackButton>← Back</BackButton>
           </div>
         </div>
 
-        {/* Form */}
-        <GradientBorderContainer>
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
-            {/* Date */}
-            <div>
+        {/* Tracking Interface */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6">
+            {/* Date Selection */}
+            <div className="mb-6">
               <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-2">
                 Date
               </label>
               <input
                 type="date"
                 id="date"
-                required
-                value={formData.date}
-                onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+                value={currentSet.date}
+                onChange={(e) => {
+                  setCurrentSet(prev => ({ ...prev, date: e.target.value }))
+                  // Refresh sets when date changes
+                  setTimeout(() => fetchSets(), 100)
+                }}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
-
-
-            {/* Weight & Reps (for reps-based exercises) */}
+            {/* Weight & Reps Tracking (for reps-based exercises) */}
             {measurementType === 'reps' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-2">
-                    Weight (optional)
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    WEIGHT ({weightUnits.find(u => u.id === parseInt(currentSet.weight_unit))?.name || 'kg'}):
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      id="weight"
-                      step="0.5"
-                      min="0"
-                      value={formData.weight}
-                      onChange={(e) => setFormData(prev => ({ ...prev, weight: e.target.value }))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="25"
-                    />
-                    <select
-                      value={formData.weight_unit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, weight_unit: e.target.value }))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentSet(prev => ({ ...prev, weight: Math.max(0, prev.weight - 2.5) }))}
+                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
                     >
-                      {weightUnits.map(unit => (
-                        <option key={unit.id} value={unit.id}>{unit.name}</option>
-                      ))}
-                    </select>
+                      −
+                    </button>
+                    <div className="flex-1 text-center">
+                      <span className="text-3xl font-bold">{currentSet.weight}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentSet(prev => ({ ...prev, weight: prev.weight + 2.5 }))}
+                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="reps" className="block text-sm font-medium text-gray-700 mb-2">
-                    Reps
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    REPS:
                   </label>
-                  <input
-                    type="number"
-                    id="reps"
-                    min="1"
-                    required
-                    value={formData.reps}
-                    onChange={(e) => setFormData(prev => ({ ...prev, reps: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="12"
-                  />
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentSet(prev => ({ ...prev, reps: Math.max(1, prev.reps - 1) }))}
+                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                    >
+                      −
+                    </button>
+                    <div className="flex-1 text-center">
+                      <span className="text-3xl font-bold">{currentSet.reps}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentSet(prev => ({ ...prev, reps: prev.reps + 1 }))}
+                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Distance & Time (for distance-based exercises) */}
+            {/* Distance & Time Tracking (for distance-based exercises) */}
             {measurementType === 'distance' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <div>
-                  <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-2">
-                    Distance
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    DISTANCE ({distanceUnits.find(u => u.id === parseInt(currentSet.distance_unit))?.name || 'km'}):
                   </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="number"
-                      id="distance"
-                      step="0.1"
-                      min="0"
-                      required
-                      value={formData.distance}
-                      onChange={(e) => setFormData(prev => ({ ...prev, distance: e.target.value }))}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      placeholder="5.0"
-                    />
-                    <select
-                      value={formData.distance_unit}
-                      onChange={(e) => setFormData(prev => ({ ...prev, distance_unit: e.target.value }))}
-                      className="px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentSet(prev => ({ ...prev, distance: Math.max(0, prev.distance - 0.1) }))}
+                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
                     >
-                      {distanceUnits.map(unit => (
-                        <option key={unit.id} value={unit.id}>{unit.name}</option>
-                      ))}
-                    </select>
+                      −
+                    </button>
+                    <div className="flex-1 text-center">
+                      <span className="text-3xl font-bold">{currentSet.distance.toFixed(1)}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentSet(prev => ({ ...prev, distance: prev.distance + 0.1 }))}
+                      className="w-12 h-12 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center justify-center text-xl font-bold"
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
 
                 <div>
-                  <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                    Time (optional)
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    TIME (HH:MM:SS):
                   </label>
                   <input
                     type="text"
-                    id="time"
                     pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
-                    value={formData.time}
-                    onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={currentSet.time}
+                    onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
                     placeholder="00:30:00"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Format: HH:MM:SS (e.g., 00:30:00)
-                  </p>
                 </div>
               </div>
             )}
 
-            {/* Time (for time-based exercises) */}
+            {/* Time Tracking (for time-based exercises) */}
             {measurementType === 'time' && (
               <div>
-                <label htmlFor="time" className="block text-sm font-medium text-gray-700 mb-2">
-                  Time (HH:MM:SS)
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  TIME (HH:MM:SS):
                 </label>
                 <input
                   type="text"
-                  id="time"
-                  required
                   pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
-                  value={formData.time}
-                  onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={currentSet.time}
+                  onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
                   placeholder="00:30:00"
                 />
-                <p className="text-xs text-gray-500 mt-1">
-                  Format: hours:minutes:seconds (e.g., 00:30:00 for 30 minutes)
-                </p>
               </div>
             )}
 
-            {/* Comment */}
-            <div>
-              <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
-                Comment (optional)
-              </label>
-              <textarea
-                id="comment"
-                rows={3}
-                value={formData.comment}
-                onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Felt good today, increased weight..."
-              />
+            {/* Action Buttons */}
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={saveSet}
+                disabled={saving}
+                className={`flex-1 font-medium py-3 px-4 rounded-md disabled:opacity-50 text-white ${
+                  editingSetId 
+                    ? 'bg-green-500 hover:bg-green-600' 
+                    : 'bg-emerald-500 hover:bg-emerald-600'
+                }`}
+              >
+                {saving ? 'SAVING...' : editingSetId ? 'UPDATE' : 'SAVE'}
+              </button>
+              <button
+                type="button"
+                onClick={clearSet}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-3 px-4 rounded-md"
+              >
+                CLEAR
+              </button>
             </div>
 
             {/* Error */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-md p-3">
+              <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-3">
                 <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
+          </div>
 
-            {/* Submit */}
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                disabled={submitting}
-                variant="rainbow"
-                className="flex-1"
+          {/* Sets History */}
+          {sets.length > 0 && (
+            <div className="border-t border-gray-200">
+              <div className="p-4 bg-gray-50">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Today&apos;s Sets</h3>
+                <div className="space-y-2">
+                  {sets.map((set, index) => (
+                    <div 
+                      key={set.id} 
+                      className={`flex items-center justify-between bg-white p-3 rounded border cursor-pointer hover:bg-gray-50 transition-colors ${
+                        editingSetId === set.id ? 'ring-2 ring-green-400 bg-green-50' : ''
+                      }`}
+                      onClick={() => handleSetClick(set)}
+                    >
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className={`flex items-center justify-center w-6 h-6 text-sm font-medium rounded-full ${
+                          editingSetId === set.id ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'
+                        }`}>
+                          {index + 1}
+                        </span>
+                        <div className="text-sm">
+                          {measurementType === 'reps' && (
+                            <span>
+                              {set.weight ? `${set.weight} ${set.weight_units?.name || ''} × ` : ''}
+                              {set.reps} reps
+                            </span>
+                          )}
+                          {measurementType === 'distance' && (
+                            <span>
+                              {set.distance} {set.distance_units?.name || ''}
+                              {set.time && ` in ${set.time}`}
+                            </span>
+                          )}
+                          {measurementType === 'time' && (
+                            <span>{set.time}</span>
+                          )}
+                        </div>
+                        {set.comment && (
+                          <div className="text-xs text-gray-500 italic truncate max-w-32">
+                            &ldquo;{set.comment}&rdquo;
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={(e) => handleCommentClick(e, set)}
+                          className="text-gray-400 hover:text-blue-600 transition-colors"
+                          title="Add/edit comment"
+                        >
+                          <FontAwesomeIcon icon={faEdit} className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => handleDeleteClick(e, set)}
+                          className="text-gray-400 hover:text-red-600 transition-colors"
+                          title="Delete set"
+                        >
+                          <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
+                        </button>
+                        <div className="text-xs text-gray-500 min-w-16 text-right">
+                          {new Date(`${set.date}T12:00:00`).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Comment Modal */}
+        <Modal isOpen={commentModalOpen} onClose={() => setCommentModalOpen(false)} maxWidth="sm">
+          <div className="p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Add Comment</h3>
+            <textarea
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              rows={3}
+              placeholder="Add a note about this set..."
+            />
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={saveComment}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md"
               >
-                {submitting ? 'Saving...' : 'Save Workout'}
-              </Button>
-
-              <Button
-                href={`/categories/${exercise?.category || ''}`}
-                variant="outline"
+                Save
+              </button>
+              <button
+                onClick={() => setCommentModalOpen(false)}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md"
               >
                 Cancel
-              </Button>
+              </button>
             </div>
-          </form>
-        </GradientBorderContainer>
+          </div>
+        </Modal>
+
+        {/* Delete Confirmation Modal */}
+        <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} maxWidth="sm">
+          <div className="p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Set</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete this set? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={deleteSet}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md"
+              >
+                Delete
+              </button>
+              <button
+                onClick={() => setDeleteModalOpen(false)}
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   )
@@ -403,7 +675,7 @@ export default function AddWorkoutPage() {
     <ProtectedLayout>
       <Suspense fallback={
         <div className="min-h-screen bg-gray-50 py-12 px-4">
-          <div className="max-w-[800px] mx-auto">
+          <div className="max-w-[600px] mx-auto">
             <div className="text-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
               <p className="mt-4 text-gray-600">Loading exercise...</p>
