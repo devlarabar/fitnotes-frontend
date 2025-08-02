@@ -163,7 +163,7 @@ export default function TrackTab({
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setCurrentSet(prev => ({ ...prev, distance: Math.max(0, prev.distance - 0.1) }))}
+                onClick={() => setCurrentSet(prev => ({ ...prev, distance: Math.round((prev.distance - 0.1) * 100) / 100 }))}
                 className="w-12 h-12"
               >
                 −
@@ -181,7 +181,7 @@ export default function TrackTab({
               <Button
                 type="button"
                 variant="ghost"
-                onClick={() => setCurrentSet(prev => ({ ...prev, distance: prev.distance + 0.1 }))}
+                onClick={() => setCurrentSet(prev => ({ ...prev, distance: Math.round((prev.distance + 0.1) * 100) / 100 }))}
                 className="w-12 h-12"
               >
                 +

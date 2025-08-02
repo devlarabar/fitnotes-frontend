@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { Workout } from '@/lib/types'
 import BackButton from './ui/BackButton'
+import CommentInput from './CommentInput'
 
 interface GroupedWorkout {
   exercise: {
@@ -122,6 +123,15 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
     })
   }
 
+  // Calculate previous and next day strings
+  const getAdjacentDate = (base: string, diff: number) => {
+    const d = new Date(base + 'T00:00:00')
+    d.setDate(d.getDate() + diff)
+    return d.toISOString().slice(0, 10)
+  }
+  const prevDate = getAdjacentDate(date, -1)
+  const nextDate = getAdjacentDate(date, 1)
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -167,14 +177,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{title || formatDate(date)}</h1>
-              <p className="mt-2 text-gray-600">
-                {title ? new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                }) : formatDate(date)}
-              </p>
+              <p className="mt-2 text-gray-600"></p>
             </div>
             <div className="flex gap-2">
               <Link
@@ -186,6 +189,13 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
               <BackButton>← Home</BackButton>
             </div>
           </div>
+        </div>
+
+        {/* Day Navigation */}
+        <div className="flex justify-center items-center gap-4 mb-4">
+          <Button href={`/day/${prevDate}`} variant="outline" size="sm">← Prev</Button>
+          <span className="text-gray-700 font-medium">{formatDate(date)}</span>
+          <Button href={`/day/${nextDate}`} variant="outline" size="sm">Next →</Button>
         </div>
 
         {/* Summary */}
@@ -205,6 +215,9 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
             </div>
           </div>
         )}
+
+        {/* Comment Input */}
+        <CommentInput date={date} />
 
         {/* Grouped Workouts */}
         {groupedWorkouts.length === 0 ? (
