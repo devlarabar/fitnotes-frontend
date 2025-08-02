@@ -2,7 +2,7 @@
 
 import { Exercise, WeightUnit, DistanceUnit, Workout } from '@/lib/types'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faEdit, faTrash, faTrophy } from '@fortawesome/free-solid-svg-icons'
 import Button from '../ui/Button'
 
 interface TrackTabProps {
@@ -270,13 +270,22 @@ export default function TrackTab({
                 onClick={() => handleSetClick(set)}
               >
                 <div className="flex items-center gap-3 flex-1">
-                  <span className={`
-                    flex items-center justify-center w-6 h-6 text-sm 
-                    font-medium rounded-full 
-                    ${editingSetId === set.id ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}
-                  `}>
-                    {index + 1}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {set.is_pr && (
+                      <FontAwesomeIcon 
+                        icon={faTrophy} 
+                        className="w-3 h-3 text-yellow-500" 
+                        title="Personal Record!"
+                      />
+                    )}
+                    <span className={`
+                      flex items-center justify-center w-6 h-6 text-sm 
+                      font-medium rounded-full 
+                      ${editingSetId === set.id ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}
+                    `}>
+                      {index + 1}
+                    </span>
+                  </div>
                   <div className="text-sm">
                     {measurementType === 'reps' && (
                       <span>
