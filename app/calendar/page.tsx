@@ -186,7 +186,7 @@ export default function CalendarPage() {
                     className={`
                       h-16 flex items-center justify-center relative border rounded-md transition-colors cursor-pointer
                       ${today ? 'bg-blue-50 border-blue-200 text-blue-700 font-semibold' : 'border-gray-200 hover:bg-gray-50'}
-                      ${workout ? 'ring-1 ring-emerald-400 ring-opacity-60' : ''}
+                      ${workout ? 'ring-1 ring-emerald-400 ring-opacity-60 bg-green-50 hover:bg-green-100' : ''}
                     `}
                   >
                     <span className="text-sm">{day}</span>

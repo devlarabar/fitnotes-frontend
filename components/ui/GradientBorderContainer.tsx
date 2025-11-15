@@ -3,11 +3,11 @@ export default function GradientBorderContainer({ children, className }: { child
     <div
       className={
         "bg-gradient-to-r from-purple-400 via-pink-400 to-emerald-400 "
-        + "p-[1px] shadow-lg rounded-lg "
+        + "p-[1px] shadow-md rounded-lg "
         + className
       }
     >
-      <div className="bg-white rounded-lg p-6">
+      <div className="bg-white rounded-lg p-3">
         {children}
       </div>
     </div>

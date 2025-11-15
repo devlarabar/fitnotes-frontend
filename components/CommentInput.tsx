@@ -74,7 +74,7 @@ export default function CommentInput({ date }: CommentInputProps) {
   }
 
   return (
-    <GradientBorderContainer className="mb-8 p-0">
+    <GradientBorderContainer className="mb-4 p-0">
       <form onSubmit={handleSubmit} className="space-y-2">
         <label htmlFor="day-comment" className="block text-sm font-semibold text-purple-700 mb-1">
           Comment

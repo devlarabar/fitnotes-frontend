@@ -134,7 +134,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-[800px] mx-auto">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
@@ -147,7 +147,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="min-h-screen bg-gray-50 py-8 px-4">
         <div className="max-w-[800px] mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
@@ -170,10 +170,10 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
       <div className="max-w-[1000px] mx-auto">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-4">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{title || formatDate(date)}</h1>
@@ -200,7 +200,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
 
         {/* Summary */}
         {groupedWorkouts.length > 0 && (
-          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
             <div className="bg-gradient-to-r from-purple-400 via-cyan-400 to-emerald-400 p-[1px] rounded-lg shadow-sm">
               <div className="bg-white rounded-lg p-4">
                 <div className="text-2xl font-bold text-blue-600">{groupedWorkouts.length}</div>
@@ -221,7 +221,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
 
         {/* Grouped Workouts */}
         {groupedWorkouts.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-8">
             <div className="text-gray-400 text-6xl mb-4">🏋️</div>
             <h3 className="text-xl font-medium text-gray-900 mb-2">No workouts {title ? 'today' : 'recorded'}</h3>
             <p className="text-gray-500 mb-6">

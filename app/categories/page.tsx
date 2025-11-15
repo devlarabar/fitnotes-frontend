@@ -100,25 +100,29 @@ function CategoriesContent() {
         </div>
 
         {/* Categories Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1">
           {categories.map((category) => (
             <Link
               key={category.id}
               href={`/categories/${category.id}${date ? `?date=${date}` : ''}`}
-              className="group bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-gray-200 overflow-hidden"
+              className="group block transition-shadow duration-200 mx-1 my-1"
             >
               <GradientBorderContainer>
-                <div className="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-lg mb-4 mx-auto group-hover:bg-blue-200 transition-colors">
-                  <span className="text-2xl">
-                    {getCategoryEmoji(category.name)}
-                  </span>
+                <div className="flex flex-row items-center space-x-4 p-1">
+                  <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                    <span className="text-2xl">
+                      {getCategoryEmoji(category.name)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col justify-center">
+                    <h3 className="text-base font-semibold text-gray-900 mb-1">
+                      {category.name}
+                    </h3>
+                    <p className="text-xs text-gray-500">
+                      View exercises →
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 text-center mb-2">
-                  {category.name}
-                </h3>
-                <p className="text-sm text-gray-500 text-center">
-                  View exercises →
-                </p>
               </GradientBorderContainer>
             </Link>
           ))}
