@@ -76,7 +76,7 @@ export default function TrackTab({
             // Refresh sets when date changes
             setTimeout(() => fetchSets(), 100)
           }}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
@@ -103,7 +103,7 @@ export default function TrackTab({
                   min="0"
                   value={currentSet.weight}
                   onChange={(e) => setCurrentSet(prev => ({ ...prev, weight: parseFloat(e.target.value) || 0 }))}
-                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
+                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 px-2 py-1"
                 />
               </div>
               <Button
@@ -136,7 +136,7 @@ export default function TrackTab({
                   min="1"
                   value={currentSet.reps}
                   onChange={(e) => setCurrentSet(prev => ({ ...prev, reps: parseInt(e.target.value) || 1 }))}
-                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
+                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 px-2 py-1"
                 />
               </div>
               <Button
@@ -175,7 +175,7 @@ export default function TrackTab({
                   min="0"
                   value={currentSet.distance}
                   onChange={(e) => setCurrentSet(prev => ({ ...prev, distance: parseFloat(e.target.value) || 0 }))}
-                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md px-2 py-1"
+                  className="w-full text-3xl font-bold text-center bg-transparent border-none focus:outline-none focus:ring-2 focus:ring-blue-500 px-2 py-1"
                 />
               </div>
               <Button
@@ -198,7 +198,7 @@ export default function TrackTab({
               pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
               value={currentSet.time}
               onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
+              className="w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
               placeholder="00:30:00"
             />
           </div>
@@ -216,7 +216,7 @@ export default function TrackTab({
             pattern="^[0-9]+:[0-5][0-9]:[0-5][0-9]$"
             value={currentSet.time}
             onChange={(e) => setCurrentSet(prev => ({ ...prev, time: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
+            className="w-full px-3 py-2 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-center text-xl"
             placeholder="00:30:00"
           />
         </div>
@@ -229,7 +229,7 @@ export default function TrackTab({
           variant={editingSetId ? 'primary' : 'secondary'}
           onClick={saveSet}
           disabled={saving}
-          className={`flex-1 font-medium py-3 px-4 rounded-md disabled:opacity-50 text-white ${editingSetId
+          className={`flex-1 font-medium py-3 px-4 disabled:opacity-50 text-white ${editingSetId
             ? 'bg-green-500 hover:bg-green-600'
             : 'bg-emerald-500 hover:bg-emerald-600'
             }`}
@@ -248,7 +248,7 @@ export default function TrackTab({
 
       {/* Error */}
       {error && (
-        <div className="mt-4 bg-red-50 border border-red-200 rounded-md p-3">
+        <div className="mt-4 bg-red-50 border border-red-200 p-3">
           <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
@@ -262,7 +262,7 @@ export default function TrackTab({
               <div
                 key={set.id}
                 className={`
-                  flex items-center justify-between p-3 rounded 
+                  flex items-center justify-between bg-gray-50 p-3 rounded 
                   cursor-pointer hover:bg-gray-100 transition-colors 
                   ${editingSetId === set.id ? 'ring-2 ring-green-400 bg-green-50' : ''
                   }
@@ -272,9 +272,9 @@ export default function TrackTab({
                 <div className="flex items-center gap-3 flex-1">
                   <div className="flex items-center gap-2">
                     {set.is_pr && (
-                      <FontAwesomeIcon 
-                        icon={faTrophy} 
-                        className="w-3 h-3 text-yellow-500" 
+                      <FontAwesomeIcon
+                        icon={faTrophy}
+                        className="w-3 h-3 text-yellow-500"
                         title="Personal Record!"
                       />
                     )}

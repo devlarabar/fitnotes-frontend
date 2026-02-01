@@ -40,7 +40,7 @@ export default function Button({
     pink: 'bg-gradient-to-r from-pink-300 to-rose-300 hover:from-pink-400 hover:to-rose-400 text-white shadow-sm focus:ring-pink-500',
     outline: 'border-2 border-purple-300 text-purple-600 bg-white hover:bg-purple-50 focus:ring-purple-500',
     ghost: 'text-purple-600 hover:bg-purple-50 hover:text-purple-700 focus:ring-purple-500',
-    danger: 'bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md'
+    danger: 'bg-watermelon hover:bg-rose-kiss text-white font-medium py-2 px-4'
   }
 
   const disabledClasses = 'opacity-50 cursor-not-allowed'

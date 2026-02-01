@@ -428,15 +428,15 @@ function AddWorkoutContent() {
 
         {/* Comment Modal */}
         <Modal isOpen={commentModalOpen} onClose={() => setCommentModalOpen(false)} maxWidth="sm">
-          <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Add Comment</h3>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">Add Comment</h3>
             <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               rows={3}
               placeholder="Add a note about this set..."
             />
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-3">
               <Button
                 onClick={saveComment}
                 variant="primary"
@@ -457,9 +457,9 @@ function AddWorkoutContent() {
 
         {/* Delete Confirmation Modal */}
         <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} maxWidth="sm">
-          <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Set</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">Delete Set</h3>
+            <p>
               Are you sure you want to delete this set? This action cannot be undone.
             </p>
             <div className="flex gap-3">
