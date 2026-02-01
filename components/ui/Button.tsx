@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 interface ButtonProps {
   children: React.ReactNode
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'rainbow' | 'pink' | 'danger'
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'outline' | 'ghost' | 'rainbow' | 'pink' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   href?: string
   onClick?: () => void
@@ -35,6 +35,7 @@ export default function Button({
   const variantClasses = {
     primary: 'border-2 border-deep-sky-blue bg-deep-sky-blue text-white hover:bg-transparent hover:text-deep-sky-blue',
     secondary: 'border-2 border-fuschia-plum bg-fuschia-plum text-white hover:bg-transparent hover:text-fuschia-plum',
+    tertiary: 'border-2 border-glaucous bg-glaucous text-white hover:bg-transparent hover:text-glaucous',
     rainbow: 'bg-gradient-to-r from-emerald-400 via-cyan-400 via-purple-400 to-pink-400 hover:from-emerald-500 hover:via-cyan-500 hover:via-purple-500 hover:to-pink-500 text-white shadow-md focus:ring-purple-500',
     pink: 'bg-gradient-to-r from-pink-300 to-rose-300 hover:from-pink-400 hover:to-rose-400 text-white shadow-sm focus:ring-pink-500',
     outline: 'border-2 border-purple-300 text-purple-600 bg-white hover:bg-purple-50 focus:ring-purple-500',

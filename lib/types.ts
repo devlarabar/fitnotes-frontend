@@ -60,3 +60,17 @@ export interface WorkoutData {
   time?: string | null
   comment?: string | null
 }
+
+export interface GroupedWorkout {
+  exercise: {
+    id: number
+    name: string
+    category: string
+  }
+  sets: Workout[]
+}
+
+export interface DayWorkoutsProps {
+  date: string // Format: YYYY-MM-DD
+  title?: string
+}

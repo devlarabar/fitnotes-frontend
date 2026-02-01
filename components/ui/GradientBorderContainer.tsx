@@ -7,7 +7,7 @@ export default function GradientBorderContainer({ children, className }: { child
         + className
       }
     >
-      <div className="bg-white p-3">
+      <div className="bg-white p-2">
         {children}
       </div>
     </div>

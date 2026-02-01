@@ -75,9 +75,9 @@ export default function CommentInput({ date }: CommentInputProps) {
   }
 
   return (
-    <GradientBorderContainer className="mb-4 p-0">
-      <form onSubmit={handleSubmit} className="space-y-2">
-        <label htmlFor="day-comment" className="block text-sm font-semibold text-purple-700 mb-1">
+    <GradientBorderContainer>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+        <label htmlFor="day-comment" className="block text-sm font-semibold">
           Comment
         </label>
         <Textarea
@@ -89,7 +89,7 @@ export default function CommentInput({ date }: CommentInputProps) {
           disabled={submitting || loading}
         />
         {commentError && <p className="text-red-500 text-sm">{commentError}</p>}
-        <div className="flex justify-end pt-1">
+        <div className="flex justify-end">
           <Button type="submit" size="sm" disabled={submitting || loading}>
             {submitting ? 'Saving...' : loading ? 'Loading...' : 'Save Comment'}
           </Button>
