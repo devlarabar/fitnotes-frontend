@@ -10,6 +10,10 @@ import { Exercise, Category } from '@/lib/types'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import BackButton from '@/components/ui/BackButton'
 import SuspenseFallback from '@/components/misc/SuspenseFallback'
+import CustomSpinner from '@/components/ui/Spinner'
+import PageWrapper from '@/components/ui/PageWrapper'
+import { ErrorPageCallout } from '@/components/ui/Callout'
+import { PlusCircleIcon } from 'lucide-react'
 
 function ExercisesContent() {
   const params = useParams()
@@ -68,47 +72,19 @@ function ExercisesContent() {
   }, [categoryId])
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading exercises...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-red-400">❌</span>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  Error loading exercises
-                </h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6">
-            <BackButton>← Back to Categories</BackButton>
-          </div>
-        </div>
-      </div>
+      <PageWrapper>
+        <ErrorPageCallout title="Error Loading Exercises" message={error} />
+      </PageWrapper>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <PageWrapper>
       <div className="max-w-[1300px] mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -121,7 +97,7 @@ function ExercisesContent() {
                 Choose an exercise to add to your workout
               </p>
             </div>
-            <BackButton>← Back to Categories</BackButton>
+            <BackButton>Categories</BackButton>
           </div>
         </div>
 
@@ -144,9 +120,7 @@ function ExercisesContent() {
                     </p>
                   </div>
                   <div className="ml-4 flex-shrink-0">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Add workout →
-                    </span>
+                      <PlusCircleIcon className="text-deep-sky-blue" />
                   </div>
                 </div>
               </GradientBorderContainer>
@@ -164,7 +138,7 @@ function ExercisesContent() {
           </div>
         )}
       </div>
-    </div>
+    </PageWrapper>
   )
 }
 

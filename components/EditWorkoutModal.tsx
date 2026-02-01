@@ -7,6 +7,7 @@ import Modal from '@/components/ui/Modal'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimes, faTrash } from '@fortawesome/free-solid-svg-icons'
 import { Workout, WeightUnit, DistanceUnit } from '@/lib/types'
+import Textarea from './form/textarea'
 
 interface EditWorkoutModalProps {
   workout: Workout | null
@@ -307,12 +308,11 @@ export default function EditWorkoutModal({ workout, isOpen, onClose, onSuccess }
           <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-1">
             Comment
           </label>
-          <textarea
+          <Textarea
             id="comment"
             rows={3}
             value={formData.comment}
             onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
             placeholder="Notes about this set..."
           />
         </div>

@@ -10,6 +10,9 @@ import { Category } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import SuspenseFallback from '@/components/misc/SuspenseFallback'
+import CustomSpinner from '@/components/ui/Spinner'
+import PageWrapper from '@/components/ui/PageWrapper'
+import { ErrorPageCallout } from '@/components/ui/Callout'
 
 function CategoriesContent() {
   const searchParams = useSearchParams()
@@ -44,47 +47,19 @@ function CategoriesContent() {
   }, [])
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading categories...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-md p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <span className="text-red-400">❌</span>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800">
-                  Error loading categories
-                </h3>
-                <div className="mt-2 text-sm text-red-700">
-                  <p>{error}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-6">
-            <BackButton>← Back to Home</BackButton>
-          </div>
-        </div>
-      </div>
+      <PageWrapper>
+        <ErrorPageCallout title="Error Loading Categories" message={error} />
+      </PageWrapper>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <PageWrapper>
       <div className="max-w-[1300px] mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -95,7 +70,7 @@ function CategoriesContent() {
                 Choose a category to see exercises and add workouts
               </p>
             </div>
-            <BackButton>← Back to Home</BackButton>
+            <BackButton>Home</BackButton>
           </div>
         </div>
 
@@ -138,7 +113,7 @@ function CategoriesContent() {
           </div>
         )}
       </div>
-    </div>
+    </PageWrapper>
   )
 }
 

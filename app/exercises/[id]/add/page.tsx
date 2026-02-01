@@ -11,6 +11,8 @@ import Modal from '@/components/ui/Modal'
 import ExerciseTabs from '@/components/exercise/ExerciseTabs'
 import Button from '@/components/ui/Button'
 import SuspenseFallback from '@/components/misc/SuspenseFallback'
+import CustomSpinner from '@/components/ui/Spinner'
+import Textarea from '@/components/form/textarea'
 
 function AddWorkoutContent() {
   const params = useParams()
@@ -387,20 +389,11 @@ function AddWorkoutContent() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[600px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading exercise...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4">
       <div className="max-w-[600px] mx-auto">
         {/* Header */}
         <div className="mb-4">
@@ -409,7 +402,7 @@ function AddWorkoutContent() {
               <h1 className="text-2xl font-bold text-gray-900">{exercise?.name}</h1>
               <p className="mt-1 text-gray-600">{exercise?.categories?.name}</p>
             </div>
-            <BackButton>← Back</BackButton>
+            <BackButton>Back</BackButton>
           </div>
         </div>
 
@@ -435,16 +428,15 @@ function AddWorkoutContent() {
 
         {/* Comment Modal */}
         <Modal isOpen={commentModalOpen} onClose={() => setCommentModalOpen(false)} maxWidth="sm">
-          <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Add Comment</h3>
-            <textarea
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">Add Comment</h3>
+            <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={3}
               placeholder="Add a note about this set..."
             />
-            <div className="flex gap-3 mt-4">
+            <div className="flex gap-3">
               <Button
                 onClick={saveComment}
                 variant="primary"
@@ -465,9 +457,9 @@ function AddWorkoutContent() {
 
         {/* Delete Confirmation Modal */}
         <Modal isOpen={deleteModalOpen} onClose={() => setDeleteModalOpen(false)} maxWidth="sm">
-          <div className="p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Delete Set</h3>
-            <p className="text-gray-600 mb-6">
+          <div className="flex flex-col gap-2">
+            <h3 className="text-lg font-semibold">Delete Set</h3>
+            <p>
               Are you sure you want to delete this set? This action cannot be undone.
             </p>
             <div className="flex gap-3">

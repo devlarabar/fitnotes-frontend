@@ -7,9 +7,10 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import WorkoutTable from '@/components/WorkoutTable'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Link from 'next/link'
 import { Workout } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
+import CustomSpinner from '@/components/ui/Spinner'
+import PageWrapper from '@/components/ui/PageWrapper'
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([])
@@ -68,21 +69,12 @@ export default function WorkoutsPage() {
   const initialLoading = loading && currentPage === 1
 
   if (initialLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading workouts...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <PageWrapper>
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
@@ -103,16 +95,16 @@ export default function WorkoutsPage() {
             </div>
           </div>
           <div className="mt-6">
-            <BackButton>← Back to Home</BackButton>
+            <BackButton>Home</BackButton>
           </div>
         </div>
-      </div>
+      </PageWrapper>
     )
   }
 
   return (
     <ProtectedLayout>
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <PageWrapper>
         <div className="max-w-[1300px] mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -123,22 +115,13 @@ export default function WorkoutsPage() {
                   Track and review your fitness progress
                 </p>
               </div>
-              <BackButton>← Back to Home</BackButton>
+              <BackButton>Home</BackButton>
             </div>
           </div>
 
           {/* Workouts Table */}
           {loading && currentPage > 1 ? (
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-              <div className="overflow-x-auto h-[60vh] relative">
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading page {currentPage}...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CustomSpinner />
           ) : (
             <WorkoutTable workouts={workouts} />
           )}
@@ -154,7 +137,7 @@ export default function WorkoutsPage() {
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1 || loading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Previous
                 </button>
@@ -181,7 +164,7 @@ export default function WorkoutsPage() {
                 <button
                   onClick={() => setCurrentPage(prev => prev + 1)}
                   disabled={!hasMore || loading}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Next
                 </button>
@@ -189,7 +172,7 @@ export default function WorkoutsPage() {
             </div>
           )}
         </div>
-      </div>
+      </PageWrapper>
     </ProtectedLayout>
   );
 }
