@@ -70,7 +70,7 @@ function CategoriesContent() {
                 Choose a category to see exercises and add workouts
               </p>
             </div>
-            <BackButton>← Back to Home</BackButton>
+            <BackButton>Home</BackButton>
           </div>
         </div>
 

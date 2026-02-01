@@ -402,7 +402,7 @@ function AddWorkoutContent() {
               <h1 className="text-2xl font-bold text-gray-900">{exercise?.name}</h1>
               <p className="mt-1 text-gray-600">{exercise?.categories?.name}</p>
             </div>
-            <BackButton>← Back</BackButton>
+            <BackButton>Back</BackButton>
           </div>
         </div>
 

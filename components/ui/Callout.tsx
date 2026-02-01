@@ -22,7 +22,7 @@ export function ErrorPageCallout({
       <span className="font-semibold">{title}</span>
       <p>{message}</p>
       <div className="mt-6">
-        <BackButton>← Back to Home</BackButton>
+        <BackButton>Home</BackButton>
       </div>
     </div>
   </Callout >

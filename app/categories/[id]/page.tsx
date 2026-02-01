@@ -13,6 +13,7 @@ import SuspenseFallback from '@/components/misc/SuspenseFallback'
 import CustomSpinner from '@/components/ui/Spinner'
 import PageWrapper from '@/components/ui/PageWrapper'
 import { ErrorPageCallout } from '@/components/ui/Callout'
+import { PlusCircleIcon } from 'lucide-react'
 
 function ExercisesContent() {
   const params = useParams()
@@ -96,7 +97,7 @@ function ExercisesContent() {
                 Choose an exercise to add to your workout
               </p>
             </div>
-            <BackButton>← Back to Categories</BackButton>
+            <BackButton>Categories</BackButton>
           </div>
         </div>
 
@@ -119,9 +120,7 @@ function ExercisesContent() {
                     </p>
                   </div>
                   <div className="ml-4 flex-shrink-0">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                      Add workout →
-                    </span>
+                      <PlusCircleIcon className="text-deep-sky-blue" />
                   </div>
                 </div>
               </GradientBorderContainer>

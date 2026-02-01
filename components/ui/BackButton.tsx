@@ -11,9 +11,9 @@ export default function BackButton({ children }: { children: React.ReactNode }) 
     <button
       onClick={handleBack}
       className={
-        "inline-flex items-center px-4 py-2 border border-blue-300 "
-        + "rounded-md shadow-sm text-sm font-medium text-blue-600 "
-        + "bg-white hover:bg-blue-50 hover:cursor-pointer"
+        "inline-flex items-center px-4 py-2 border bg-deep-sky-blue text-white "
+        + "text-sm font-semibold "
+        + "hover:bg-baby-blue-ice hover:cursor-pointer"
       }
     >
       {children}

@@ -95,7 +95,7 @@ export default function WorkoutsPage() {
             </div>
           </div>
           <div className="mt-6">
-            <BackButton>← Back to Home</BackButton>
+            <BackButton>Home</BackButton>
           </div>
         </div>
       </PageWrapper>
@@ -115,7 +115,7 @@ export default function WorkoutsPage() {
                   Track and review your fitness progress
                 </p>
               </div>
-              <BackButton>← Back to Home</BackButton>
+              <BackButton>Home</BackButton>
             </div>
           </div>
 

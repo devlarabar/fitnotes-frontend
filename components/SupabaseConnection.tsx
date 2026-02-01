@@ -48,7 +48,7 @@ export default function SupabaseConnection() {
 
   const getStatusText = () => {
     if (loading) return 'Checking connection...'
-    if (isConnected) return 'Connected to Supabase'
+    if (isConnected) return 'Supabase is connected'
     return 'Failed to connect to Supabase'
   }
 
@@ -60,24 +60,18 @@ export default function SupabaseConnection() {
 
   return (
     <div className="w-full max-w-md mx-auto">
-      <GradientBorderContainer className="p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-          Supabase Connection Status
-        </h3>
-
-        <div className={`px-4 py-3 rounded-md border text-center ${getStatusColor()}`}>
-          <div className="flex items-center justify-center space-x-2">
-            <span className="text-xl">{getStatusIcon()}</span>
-            <span className="font-medium">{getStatusText()}</span>
-          </div>
+      <GradientBorderContainer>
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-xl">{getStatusIcon()}</span>
+          <span className="font-medium">{getStatusText()}</span>
         </div>
 
         {!isConnected && !loading && (
-          <div className="mt-4 p-3 rounded-md">
-            <p className="text-sm text-gray-600">
+          <div className="p-3 text-watermelon">
+            <p className="text-sm">
               Make sure your environment variables are set:
             </p>
-            <ul className="text-xs text-gray-500 mt-2 space-y-1">
+            <ul className="text-xs space-y-1">
               <li>• NEXT_PUBLIC_SUPABASE_URL</li>
               <li>• NEXT_PUBLIC_SUPABASE_ANON_KEY</li>
             </ul>

@@ -1,6 +1,5 @@
 import SupabaseConnection from '@/components/SupabaseConnection'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Button from '@/components/ui/Button'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import CustomLink from '@/components/typography/CustomLink';
 import PageWrapper from '@/components/ui/PageWrapper';
@@ -10,55 +9,25 @@ export default function Home() {
   return (
     <ProtectedLayout>
       <PageWrapper>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto flex flex-col gap-5">
           {/* Header Section */}
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center flex flex-col gap-3">
+            <h1 className="text-3xl font-bold">
               Lara&apos;s FitNotes Backup
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl">
               I switched to iOS, RIP.
             </p>
-          </div>
 
-          {/* Supabase Connection Component */}
-          <div className="mb-12">
             <SupabaseConnection />
           </div>
 
-          {/* Navigation */}
-          <div className="mb-12 text-center">
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                href={`/day/${today}`}
-                variant="primary"
-                size="lg"
-              >
-                Today&apos;s Workouts
-              </Button>
-              <Button
-                href="/workouts"
-                variant="secondary"
-                size="lg"
-              >
-                View All Workouts
-              </Button>
-              <Button
-                href="/categories"
-                variant="outline"
-                size="lg"
-              >
-                Add Workout
-              </Button>
-            </div>
-          </div>
-
           {/* About */}
-          <GradientBorderContainer>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+          <GradientBorderContainer className="flex flex-col gap-6">
+            <h2 className="text-xl font-semibold">
               About Lara&apos;s FitNotes Backup
             </h2>
-            <div className="prose prose-lg text-gray-700 space-y-4">
+            <div className="prose prose-lg space-y-3 mt-2">
               <p>
                 I used <CustomLink href="https://www.fitnotesapp.com/">FitNotes</CustomLink> on Android for over a decade. Then I broke my phone,
                 and switched to an iPhone, and discovered that FitNotes isn&apos;t supported
@@ -68,6 +37,9 @@ export default function Home() {
                 I&apos;m using Supabase to store the data, which I had exported from FitNotes
                 as a CSV. I re-created a schema and then wrote a Python script to bulk
                 insert the data into the new tables. This app was built with Next.js.
+              </p>
+              <p>
+                <CustomLink href="/workouts">View all recorded workouts</CustomLink>
               </p>
             </div>
           </GradientBorderContainer>
