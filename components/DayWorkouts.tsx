@@ -139,7 +139,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="min-h-screen py-8 px-4">
         <div className="max-w-[800px] mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
@@ -162,7 +162,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4">
       <div className="max-w-[1000px] mx-auto">
         {/* Header */}
         <div className="mb-4">

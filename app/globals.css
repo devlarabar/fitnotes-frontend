@@ -15,10 +15,27 @@
   }
 }
 
+@theme {
+  --color-watermelon: #ed254e;
+  --color-rose-kiss: #ff6392;
+  --color-royal-gold: #f9dc5c;
+  --color-tea-green: #c2eabd;
+  --color-prussian-blue: #011936;
+  --color-charcoal-blue: #465362;
+  --color-charcoal-blue-light: #6b7b8c;
+  --color-charcoal-blue-dark: #2c3e50;
+  --color-cool-horizon: #67aaf9;
+  --color-deep-sky-blue: #2ec0f9;
+  --color-baby-blue-ice: #9bbdf9;
+  --color-ice-light: #dce9fb;
+  --color-pale-sky: #c4e0f9;
+  --color-fuschia-plum: #b95f89;
+}
+
 body {
   color: #000000;
-  background: #e5e0e0;
   font-family: 'Inter', sans-serif;
+  @apply bg-gray-50;
 }
 
 /* Pretty scrollbars for table */

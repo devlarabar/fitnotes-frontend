@@ -50,7 +50,7 @@ function CategoriesContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <div className="min-h-screen py-12 px-4">
         <div className="max-w-[1300px] mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
@@ -76,7 +76,7 @@ function CategoriesContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen py-12 px-4">
       <div className="max-w-[1300px] mx-auto">
         {/* Header */}
         <div className="mb-8">

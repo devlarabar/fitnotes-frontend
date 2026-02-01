@@ -12,6 +12,7 @@ import ExerciseTabs from '@/components/exercise/ExerciseTabs'
 import Button from '@/components/ui/Button'
 import SuspenseFallback from '@/components/misc/SuspenseFallback'
 import CustomSpinner from '@/components/ui/Spinner'
+import Textarea from '@/components/form/textarea'
 
 function AddWorkoutContent() {
   const params = useParams()
@@ -392,7 +393,7 @@ function AddWorkoutContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen py-8 px-4">
       <div className="max-w-[600px] mx-auto">
         {/* Header */}
         <div className="mb-4">
@@ -429,10 +430,9 @@ function AddWorkoutContent() {
         <Modal isOpen={commentModalOpen} onClose={() => setCommentModalOpen(false)} maxWidth="sm">
           <div className="p-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Add Comment</h3>
-            <textarea
+            <Textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               rows={3}
               placeholder="Add a note about this set..."
             />

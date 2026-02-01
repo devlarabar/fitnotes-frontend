@@ -4,8 +4,16 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from './AuthProvider'
 import { useState } from 'react'
-import RoseButton from './ui/RoseButton'
 import Modal from './ui/Modal'
+import Button from './ui/Button'
+import {
+  Calendar1Icon,
+  CalendarIcon,
+  DoorOpenIcon,
+  HomeIcon,
+  PlusCircleIcon,
+  UserIcon,
+} from 'lucide-react'
 
 export default function BottomNav() {
   const pathname = usePathname()
@@ -13,37 +21,39 @@ export default function BottomNav() {
   const [showLogout, setShowLogout] = useState(false)
 
   const today = new Date().toISOString().split('T')[0]
-  
+
+  const navIconClasses = "h-5 w-5"
+
   const navItems = [
     {
       href: '/',
-      icon: '🏠',
+      icon: <HomeIcon className={navIconClasses} />,
       label: 'Home',
       active: pathname === '/'
     },
     {
       href: `/day/${today}`,
-      icon: '🗓️',
+      icon: <Calendar1Icon className={navIconClasses} />,
       label: 'Today',
       active: pathname === `/day/${today}` || pathname === '/today'
     },
     {
       href: '/categories',
-      icon: '+',
+      icon: <PlusCircleIcon className={navIconClasses} />,
       label: 'Add',
       active: pathname.startsWith('/categories') || pathname.startsWith('/exercises'),
       isAdd: true
     },
     {
       href: '/calendar',
-      icon: '📅',
+      icon: <CalendarIcon className={navIconClasses} />,
       label: 'Calendar',
       active: pathname === '/calendar'
     },
     {
       href: '#',
-      icon: '👤',
-      label: 'Profile',
+      icon: <UserIcon className={navIconClasses} />,
+      label: 'Sign Out',
       active: false,
       isProfile: true
     }
@@ -63,60 +73,50 @@ export default function BottomNav() {
       {/* Logout Modal */}
       <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} maxWidth="sm">
         <div className="text-center">
-          <div className="text-4xl mb-4">👋</div>
+          <div className="flex justify-center items-center p-3"><DoorOpenIcon className="h-8 w-8" /></div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             Sign out?
           </h3>
-          <p className="text-sm text-gray-500 mb-6">
-            {user?.email}
+          <p className="text-sm text-gray-500 mb-6 flex flex-col gap-1">
+            <span>You are currently signed in as:</span>
+            <span>{user?.email}</span>
           </p>
           <div className="flex gap-3">
-            <button
+            <Button
               onClick={() => setShowLogout(false)}
-              className="hover:cursor-pointer flex-1 px-4 py-2 text-sm font-medium text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 border border-purple-200 transition-colors"
+              variant="outline"
+              className="w-full"
             >
               Cancel
-            </button>
-            <RoseButton onClick={handleLogout}>
+            </Button>
+            <Button onClick={handleLogout} className="w-full">
               Sign out
-            </RoseButton>
+            </Button>
           </div>
         </div>
       </Modal>
 
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-purple-500 shadow-lg z-50">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white text-charcoal-blue shadow-lg z-50">
         <div className="max-w-md mx-auto">
           <div className="flex justify-around items-center py-3">
             {navItems.map((item) => (
-              item.isProfile ? (
-                <button
-                  key="profile"
-                  onClick={handleProfileClick}
-                  className="hover:cursor-pointer flex flex-col items-center justify-center w-14 h-14 rounded-lg transition-all duration-200 text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  <div className="text-xl">
-                    {item.icon}
-                  </div>
-                  <span className="text-xs font-medium mt-1">
-                    {item.label}
-                  </span>
-                </button>
-              ) : (
+              (
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={item.isProfile ? handleProfileClick : undefined}
                   className={`flex flex-col items-center justify-center w-14 h-14 rounded-lg transition-all duration-200 ${item.active
                     ? item.isAdd
-                      ? 'bg-gradient-to-br from-purple-400 to-pink-400 text-white shadow-lg scale-110'
-                      : 'bg-blue-50 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-rose-kiss'
+                      : 'bg-ice-light'
+                    : ' hover:bg-ice-light'
                     } ${item.isAdd ? 'transform' : ''}`}
                 >
                   <div
                     className={`${item.isAdd
                       ? item.active
                         ? 'text-white font-bold text-2xl'
-                        : 'text-purple-500 font-bold text-3xl'
+                        : 'text-3xl'
                       : 'text-xl'
                       }`}
                   >

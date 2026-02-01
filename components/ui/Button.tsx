@@ -22,7 +22,9 @@ export default function Button({
   type = 'button',
   className = ''
 }: ButtonProps) {
-  const baseClasses = 'hover:cursor-pointer inline-flex items-center justify-center font-medium rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2'
+  const baseClasses = `hover:cursor-pointer inline-flex items-center 
+  justify-center font-medium transition-all duration-200 focus:outline-none 
+  focus:ring-2 focus:ring-offset-2`
 
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm',
@@ -31,8 +33,8 @@ export default function Button({
   }
 
   const variantClasses = {
-    primary: 'bg-gradient-to-r from-cyan-500 to-purple-400 hover:from-cyan-600 hover:to-purple-500 text-white shadow-sm focus:ring-purple-500',
-    secondary: 'bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white shadow-sm focus:ring-pink-500',
+    primary: 'border-2 border-deep-sky-blue bg-deep-sky-blue text-white hover:bg-transparent hover:text-deep-sky-blue',
+    secondary: 'border-2 border-fuschia-plum bg-fuschia-plum text-white hover:bg-transparent hover:text-fuschia-plum',
     rainbow: 'bg-gradient-to-r from-emerald-400 via-cyan-400 via-purple-400 to-pink-400 hover:from-emerald-500 hover:via-cyan-500 hover:via-purple-500 hover:to-pink-500 text-white shadow-md focus:ring-purple-500',
     pink: 'bg-gradient-to-r from-pink-300 to-rose-300 hover:from-pink-400 hover:to-rose-400 text-white shadow-sm focus:ring-pink-500',
     outline: 'border-2 border-purple-300 text-purple-600 bg-white hover:bg-purple-50 focus:ring-purple-500',

@@ -2,12 +2,12 @@ export default function GradientBorderContainer({ children, className }: { child
   return (
     <div
       className={
-        "bg-gradient-to-r from-purple-400 via-pink-400 to-emerald-400 "
-        + "p-[1px] shadow-md rounded-lg "
+        "bg-gradient-to-r from-cool-horizon via-baby-blue-ice to-deep-sky-blue "
+        + "p-[1px] "
         + className
       }
     >
-      <div className="bg-white rounded-lg p-3">
+      <div className="bg-white p-3">
         {children}
       </div>
     </div>

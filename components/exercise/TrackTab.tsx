@@ -262,7 +262,7 @@ export default function TrackTab({
               <div
                 key={set.id}
                 className={`
-                  flex items-center justify-between bg-gray-50 p-3 rounded 
+                  flex items-center justify-between p-3 rounded 
                   cursor-pointer hover:bg-gray-100 transition-colors 
                   ${editingSetId === set.id ? 'ring-2 ring-green-400 bg-green-50' : ''
                   }

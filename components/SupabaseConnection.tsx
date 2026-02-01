@@ -73,7 +73,7 @@ export default function SupabaseConnection() {
         </div>
 
         {!isConnected && !loading && (
-          <div className="mt-4 p-3 bg-gray-50 rounded-md">
+          <div className="mt-4 p-3 rounded-md">
             <p className="text-sm text-gray-600">
               Make sure your environment variables are set:
             </p>

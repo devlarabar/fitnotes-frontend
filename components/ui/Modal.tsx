@@ -25,10 +25,14 @@ export default function Modal({ isOpen, onClose, children, maxWidth = 'md' }: Mo
 
   return (
     <div
-      className="fixed inset-0 bg-gradient-to-br from-purple-100/80 via-pink-100/80 to-cyan-100/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      className={`fixed inset-0 bg-gradient-to-br from-purple-100/80 
+        via-pink-100/80 to-cyan-100/80 backdrop-blur-sm z-50 flex 
+        items-center justify-center p-4`}
       onClick={handleBackdropClick}
     >
-      <div className={`bg-white/95 backdrop-blur-md rounded-xl shadow-2xl border border-white/50 p-6 ${maxWidthClasses[maxWidth]} w-full max-h-[90vh] overflow-y-auto`}>
+      <div className={`bg-white/95 backdrop-blur-md shadow-2xl border 
+        border-white/50 p-6 ${maxWidthClasses[maxWidth]} w-full max-h-[90vh] 
+        overflow-y-auto`}>
         {children}
       </div>
     </div>

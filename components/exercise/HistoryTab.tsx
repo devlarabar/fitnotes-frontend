@@ -36,7 +36,7 @@ export default function HistoryTab({ allSets, exercise }: HistoryTabProps) {
       ) : (
         <div className="space-y-4">
           {dates.map((date) => (
-            <div key={date} className="bg-gray-50 rounded-lg p-4">
+            <div key={date} className="rounded-lg p-4">
               <div className="flex justify-between items-center mb-3">
                 <h4 className="font-medium text-gray-900">
                   {new Date(date + 'T00:00:00').toLocaleDateString('en-US', {
