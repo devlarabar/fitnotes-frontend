@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation'
 import ProtectedLayout from '@/components/ProtectedLayout'
 import DayWorkouts from '@/components/DayWorkouts'
 import PageWrapper from '@/components/ui/PageWrapper'
+import { ErrorPageCallout } from '@/components/ui/Callout'
 
 export default function DayPage() {
   const params = useParams()
@@ -16,23 +17,7 @@ export default function DayPage() {
     return (
       <ProtectedLayout>
         <PageWrapper>
-          <div className="max-w-[800px] mx-auto">
-            <div className="bg-red-50 border border-red-200 rounded-md p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <span className="text-red-400">❌</span>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
-                    Invalid Date
-                  </h3>
-                  <div className="mt-2 text-sm text-red-700">
-                    <p>Please provide a valid date in YYYY-MM-DD format.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <ErrorPageCallout title="Invalid Date" message="Please provide a valid date in YYYY-MM-DD format." />
         </PageWrapper>
       </ProtectedLayout>
     )

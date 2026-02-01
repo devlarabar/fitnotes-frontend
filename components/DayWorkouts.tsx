@@ -107,32 +107,26 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
     <PageWrapper>
       <div className="max-w-[1000px] mx-auto flex flex-col gap-4">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="max-w-[1000px] w-full mx-auto flex flex-col gap-4">
+          <div className="flex items-center justify-between w-full gap-2">
+            <Button href={`/day/${prevDate}`} variant="outline" size="sm">←</Button>
             <h1 className="text-3xl font-bold text-gray-900">{title || formatDate(date)}</h1>
-
-            {/* Summary */}
-            {groupedWorkouts.length > 0 && (
-              <div className="max-w-sm grid grid-cols-2 gap-2">
-                <div className="">
-                  <div className="text-xl font-bold text-deep-sky-blue">{groupedWorkouts.length}</div>
-                  <div className="text-sm">Exercise{groupedWorkouts.length !== 1 ? 's' : ''}</div>
-                </div>
-                <div className="">
-                  <div className="text-xl font-bold text-rose-kiss">{getTotalSets()}</div>
-                  <div className="text-sm">Total Set{getTotalSets() !== 1 ? 's' : ''}</div>
-                </div>
-              </div>
-            )}
-
+            <Button href={`/day/${nextDate}`} variant="outline" size="sm">→</Button>
           </div>
-        </div>
 
-        {/* Day Navigation */}
-        <div className="flex justify-between items-center gap-4">
-          <Button href={`/day/${prevDate}`} variant="outline" size="sm">← Prev</Button>
-          <span className="text-gray-700 font-medium">{formatDate(date)}</span>
-          <Button href={`/day/${nextDate}`} variant="outline" size="sm">Next →</Button>
+          {/* Summary */}
+          {groupedWorkouts.length > 0 && (
+            <div className="max-w-sm grid grid-cols-2 gap-8 text-center mx-auto">
+              <div className="">
+                <div className="text-xl font-bold text-deep-sky-blue">{groupedWorkouts.length}</div>
+                <div className="text-sm">Exercise{groupedWorkouts.length !== 1 ? 's' : ''}</div>
+              </div>
+              <div className="">
+                <div className="text-xl font-bold text-rose-kiss">{getTotalSets()}</div>
+                <div className="text-sm">Total Set{getTotalSets() !== 1 ? 's' : ''}</div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Comment Input */}
@@ -174,6 +168,6 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
           </div>
         )}
       </div>
-    </PageWrapper>
+    </PageWrapper >
   )
 }

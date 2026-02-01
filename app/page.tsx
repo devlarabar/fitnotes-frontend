@@ -5,7 +5,6 @@ import CustomLink from '@/components/typography/CustomLink';
 import PageWrapper from '@/components/ui/PageWrapper';
 
 export default function Home() {
-  const today = new Date().toISOString().split('T')[0]
   return (
     <ProtectedLayout>
       <PageWrapper>
