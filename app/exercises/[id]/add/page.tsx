@@ -11,6 +11,7 @@ import Modal from '@/components/ui/Modal'
 import ExerciseTabs from '@/components/exercise/ExerciseTabs'
 import Button from '@/components/ui/Button'
 import SuspenseFallback from '@/components/misc/SuspenseFallback'
+import CustomSpinner from '@/components/ui/Spinner'
 
 function AddWorkoutContent() {
   const params = useParams()
@@ -387,16 +388,7 @@ function AddWorkoutContent() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[600px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading exercise...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   return (

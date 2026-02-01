@@ -11,6 +11,7 @@ import { faEdit } from '@fortawesome/free-solid-svg-icons'
 import { Workout } from '@/lib/types'
 import BackButton from './ui/BackButton'
 import CommentInput from './CommentInput'
+import CustomSpinner from './ui/Spinner'
 
 interface GroupedWorkout {
   exercise: {
@@ -133,16 +134,7 @@ export default function DayWorkouts({ date, title }: DayWorkoutsProps) {
   const nextDate = getAdjacentDate(date, 1)
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-8 px-4">
-        <div className="max-w-[800px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading workouts...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   if (error) {

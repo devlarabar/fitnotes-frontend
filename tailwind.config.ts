@@ -1,9 +1,16 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
+import flowbite from "flowbite/plugin";
 
 const config: Config = {
   content: [
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/flowbite-react/**/*.{js,ts,jsx,tsx}",
+  ],
+  plugins: [
+    tailwindcssAnimate,
+    flowbite,
   ],
   theme: {
     extend: {

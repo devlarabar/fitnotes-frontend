@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'next/navigation'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
+import CustomSpinner from '@/components/ui/Spinner'
 
 interface WorkoutDay {
   date: string
@@ -218,11 +219,7 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            {loading && (
-              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              </div>
-            )}
+            {loading && <CustomSpinner />}
           </GradientBorderContainer>
         </div>
       </div>

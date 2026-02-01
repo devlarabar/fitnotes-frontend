@@ -10,6 +10,7 @@ import { Category } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import SuspenseFallback from '@/components/misc/SuspenseFallback'
+import CustomSpinner from '@/components/ui/Spinner'
 
 function CategoriesContent() {
   const searchParams = useSearchParams()
@@ -44,16 +45,7 @@ function CategoriesContent() {
   }, [])
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading categories...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   if (error) {

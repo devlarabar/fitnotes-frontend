@@ -7,9 +7,9 @@ import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import WorkoutTable from '@/components/WorkoutTable'
 import ProtectedLayout from '@/components/ProtectedLayout'
-import Link from 'next/link'
 import { Workout } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
+import CustomSpinner from '@/components/ui/Spinner'
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([])
@@ -68,16 +68,7 @@ export default function WorkoutsPage() {
   const initialLoading = loading && currentPage === 1
 
   if (initialLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12 px-4">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading workouts...</p>
-          </div>
-        </div>
-      </div>
-    )
+    return <CustomSpinner />
   }
 
   if (error) {
@@ -129,16 +120,7 @@ export default function WorkoutsPage() {
 
           {/* Workouts Table */}
           {loading && currentPage > 1 ? (
-            <div className="bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
-              <div className="overflow-x-auto h-[60vh] relative">
-                <div className="h-full flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading page {currentPage}...</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CustomSpinner />
           ) : (
             <WorkoutTable workouts={workouts} />
           )}
