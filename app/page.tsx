@@ -3,12 +3,13 @@ import ProtectedLayout from '@/components/ProtectedLayout'
 import Button from '@/components/ui/Button'
 import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import CustomLink from '@/components/typography/CustomLink';
+import PageWrapper from '@/components/ui/PageWrapper';
 
 export default function Home() {
   const today = new Date().toISOString().split('T')[0]
   return (
     <ProtectedLayout>
-      <div className="min-h-screen py-12 px-4">
+      <PageWrapper>
         <div className="max-w-4xl mx-auto">
           {/* Header Section */}
           <div className="text-center mb-12">
@@ -71,7 +72,7 @@ export default function Home() {
             </div>
           </GradientBorderContainer>
         </div>
-      </div>
+      </PageWrapper>
     </ProtectedLayout>
   );
 }

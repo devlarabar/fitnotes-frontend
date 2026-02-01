@@ -10,6 +10,7 @@ import ProtectedLayout from '@/components/ProtectedLayout'
 import { Workout } from '@/lib/types'
 import BackButton from '@/components/ui/BackButton'
 import CustomSpinner from '@/components/ui/Spinner'
+import PageWrapper from '@/components/ui/PageWrapper'
 
 export default function WorkoutsPage() {
   const [workouts, setWorkouts] = useState<Workout[]>([])
@@ -73,7 +74,7 @@ export default function WorkoutsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen py-12 px-4">
+      <PageWrapper>
         <div className="max-w-7xl mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
@@ -97,13 +98,13 @@ export default function WorkoutsPage() {
             <BackButton>← Back to Home</BackButton>
           </div>
         </div>
-      </div>
+      </PageWrapper>
     )
   }
 
   return (
     <ProtectedLayout>
-      <div className="min-h-screen py-12 px-4">
+      <PageWrapper>
         <div className="max-w-[1300px] mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -171,7 +172,7 @@ export default function WorkoutsPage() {
             </div>
           )}
         </div>
-      </div>
+      </PageWrapper>
     </ProtectedLayout>
   );
 }

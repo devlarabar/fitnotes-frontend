@@ -11,6 +11,7 @@ import GradientBorderContainer from '@/components/ui/GradientBorderContainer'
 import BackButton from '@/components/ui/BackButton'
 import SuspenseFallback from '@/components/misc/SuspenseFallback'
 import CustomSpinner from '@/components/ui/Spinner'
+import PageWrapper from '@/components/ui/PageWrapper'
 
 function ExercisesContent() {
   const params = useParams()
@@ -74,7 +75,7 @@ function ExercisesContent() {
 
   if (error) {
     return (
-      <div className="min-h-screen py-12 px-4">
+      <PageWrapper>
         <div className="max-w-[1300px] mx-auto">
           <div className="bg-red-50 border border-red-200 rounded-md p-4">
             <div className="flex">
@@ -95,12 +96,12 @@ function ExercisesContent() {
             <BackButton>← Back to Categories</BackButton>
           </div>
         </div>
-      </div>
+      </PageWrapper>
     )
   }
 
   return (
-    <div className="min-h-screen py-12 px-4">
+    <PageWrapper>
       <div className="max-w-[1300px] mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -156,7 +157,7 @@ function ExercisesContent() {
           </div>
         )}
       </div>
-    </div>
+    </PageWrapper>
   )
 }
 
